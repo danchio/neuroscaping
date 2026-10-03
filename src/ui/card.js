@@ -3,6 +3,7 @@ import { byName, norm, titleCase, FACTIONS, TAGS } from '../lib/cards.js';
 import { esc } from './dom.js';
 import { glyph, runIcon, chevrons } from './glyphs.js';
 import { href } from '../router.js';
+import { costLabel, costPhrase } from '../lib/abilities.js';
 
 export const fvar = (f) => `var(--f-${f.toLowerCase()})`;
 export const edgeStyle = (c) => {
@@ -43,11 +44,11 @@ export function rich(raw, linkCards = true) {
 export const needText = (needs) => Object.entries(needs).map(([f, n]) => `${n} ${f}`).join(' + ');
 export const MODE = { base: '', instead: 'replaces the tier before', adds: 'adds to the tier before', or: 'or the tier before' };
 
-export const costLabel = (a) => [a.ram != null ? `${a.ram} RAM` : '', a.run ? 'run' : ''].filter(Boolean).join(' + ') || 'free';
 
 /** The chevron banner: [RAM box] NAME >>> */
-export function banner(a) {
-  return `<span class="banner" title="${esc(titleCase(a.name))}: costs ${esc(costLabel(a))}"><span class="b-cost"><b>${a.ram != null ? a.ram : 0}</b>${a.run ? runIcon : ''}</span><span class="b-name">${esc(a.name)}${chevrons}</span></span>`;
+export function banner(a, { text = false } = {}) {
+  const b = `<span class="banner" title="${esc(titleCase(a.name))}: ${esc(costPhrase(a))}"><span class="b-cost"><b>${a.ram != null ? a.ram : 0}</b>${a.run ? runIcon : ''}</span><span class="b-name">${esc(a.name)}${chevrons}</span></span>`;
+  return text ? `<span class="ab">${b}<span class="ab-cost">${esc(costLabel(a))}</span></span>` : b;
 }
 
 export const statPlate = (c) => {
@@ -81,7 +82,7 @@ export function rulesHtml(c, { linkCards = true } = {}) {
  */
 export function cardFrame(c, { mode = 'tile', foot = '', cls = '', link = true } = {}) {
   const head = `<header class="cf-head">${costBox(c)}<h3 class="cf-name">${link && mode === 'tile' ? `<a href="${href.card(c.id)}" class="cf-link">${esc(c.name)}</a>` : esc(c.name)}</h3>${glyphRow(c)}</header>`;
-  const abs = c.abilities ? `<div class="cf-abs">${c.abilities.map(banner).join('')}</div>` : '';
+  const abs = c.abilities ? `<div class="cf-abs">${c.abilities.map((a) => banner(a, { text: mode === 'full' })).join('')}</div>` : '';
   const meta = `<footer class="cf-foot"><span class="rar">${esc(c.rarity)}${c.copyLimit ? `, max ${c.copyLimit}` : ', no limit'}</span>${statPlate(c)}</footer>`;
   return `<article class="cf ${mode} ${cls}" style="${edgeStyle(c)}" data-id="${c.id}"><div class="cf-edge"><div class="cf-in">
     ${head}<p class="cf-type">${typeLine(c)}</p><div class="cf-rules">${rulesHtml(c, { linkCards: mode === 'full' })}</div>${abs}${meta}${foot}

@@ -3,6 +3,7 @@ import { emptyDeck, validate, deckStats } from './deck.js';
 import { persistentFactionCounts } from './deck.js';
 import { tierStatus } from './synergy.js';
 import { RULES_BRIEF } from './config.js';
+import { costPhrase } from './abilities.js';
 
 const section = (zone) =>
   Object.entries(zone)
@@ -89,7 +90,7 @@ export function aiPrompt(deck) {
     const stat = c.type === 'Character' ? ` ${c.atk}/${c.def}` : '';
     const cost = c.ram != null ? ` (${c.ram} RAM)` : '';
     const fac = [...c.factions, ...c.tags].join('/');
-    const abil = c.abilities ? ` Abilities: ${c.abilities.map((a) => `${titleCase(a.name)} (cost ${[a.ram != null ? a.ram + ' RAM' : '', a.run ? 'run' : ''].filter(Boolean).join(' + ') || 'free'})`).join('; ')}.` : '';
+    const abil = c.abilities ? ` Abilities: ${c.abilities.map((a) => `${titleCase(a.name)} (cost: ${costPhrase(a)})`).join('; ')}.` : '';
     return `- ${n}x ${titleCase(c.name)} [${c.type}${c.subtype ? ' ' + c.subtype : ''}${fac ? ', ' + fac : ''}]${cost}${stat}: ${c.text.join(' | ')}${abil}`;
   };
   const out = [

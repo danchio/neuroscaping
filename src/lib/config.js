@@ -20,8 +20,12 @@ export const LIMITS = {
 };
 
 export const RULES_BRIEF = `Neuroscape rules in brief:
-- Cyberdeck: 50-255 cards, plus exactly 1 mainframe. Sideboard: up to 12 non-mainframe cards plus 1 extra mainframe.
-- Copy limit is per card (usually 4) across cyberdeck and sideboard combined. Iconic cards: only one can be controlled at a time.
+- Cyberdeck: 50-255 cards, none of them RAM cards or mainframes. Plus exactly 1 mainframe.
+- RAM deck: a separate deck of exactly 25 RAM cards. It is not part of the cyberdeck.
+- Sideboard: up to 12 non-RAM cards plus 1 extra mainframe.
+- Copy limit is per card (usually 4) across cyberdeck and sideboard combined. Iconic cards: only one can be controlled at a time, and a deck can hold up to 4 of them.
 - Mainframe health 20 (blue attack), bioframe health 20 (red attack).
-- Faction synergy = number of persistent cards with that faction icon you control. Mainframes unlock effect tiers at faction synergy thresholds.
-- RAM is installed each turn (2 per turn after the first turn; the first player gets 1). Opening hand is 5 cards.`;
+- Faction synergy = number of persistent, face-up cards with that faction icon you control. Mainframes and face-down cards (trojans) do not count. Mainframes unlock effect tiers at faction synergy thresholds.
+- Opening hand is 5 cards. Mulligan: choose cards, return them to the bottom of the deck, then redraw.
+- Each turn you INITIALIZE: draw or install 2 cards in any combination from the cyberdeck and/or the RAM deck (the player going first takes only 1 on their first turn). RAM comes from the RAM deck, not from your hand.
+- Activated-ability costs are running the character (rotating it), running an amount of RAM, or both. "Run 2 RAM" and "run this character" are separate costs. There is no upgrade mechanic: UPGRADE is only the name of some abilities.`;

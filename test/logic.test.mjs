@@ -119,7 +119,7 @@ test('ability costs are attached from card images', () => {
   const hex = card('HEX, CODEMANCER');
   assert.equal(hex.abilities[0].ram, 2);
   assert.ok(card('Rubber Ducky').abilities[0].name === 'ACTIVATE');
-  assert.match(aiPrompt({ ...emptyDeck('x'), main: { [adm.id]: 4 } }), /Upgrade \(cost 2 RAM \+ run\)/);
+  assert.match(aiPrompt({ ...emptyDeck('x'), main: { [adm.id]: 4 } }), /Upgrade \(cost: run 2 RAM and run this character\)/);
 });
 
 // ---- redesign: roles, suggestions, quick add ----
@@ -165,4 +165,27 @@ test('deck suggestions skip maxed cards and credit tier progress', () => {
   assert.ok(!s.some((x) => x.card.name === 'ADMIN'), 'maxed card is not suggested');
   assert.ok(s.length > 5 && s.every((x) => x.why.length));
   assert.deepEqual(suggestForDeck(emptyDeck()), []);
+});
+
+import { costPhrase, costLabel } from '../src/lib/abilities.js';
+import { RULES_BRIEF } from '../src/lib/config.js';
+
+test('ability cost wording', () => {
+  assert.equal(costPhrase({ ram: 2, run: true }), 'run 2 RAM and run this character');
+  assert.equal(costPhrase({ ram: 2, run: false }), 'run 2 RAM');
+  assert.equal(costPhrase({ ram: null, run: true }), 'run this character');
+  assert.equal(costPhrase({ ram: null, run: false }), 'no cost');
+  assert.equal(costLabel({ ram: 1, run: false }), 'Run 1 RAM');
+  assert.match(aiPrompt({ ...emptyDeck('x'), main: { [card('Coder').id]: 4 } }), /Data Scrape \(cost: run 2 RAM\)/);
+  assert.doesNotMatch(aiPrompt({ ...emptyDeck('x'), main: { [card('Admin').id]: 1 } }), /2 RAM \+ run/);
+});
+
+test('AI rules brief carries the verified rules', () => {
+  assert.match(RULES_BRIEF, /RAM deck: a separate deck of exactly 25 RAM cards/);
+  assert.match(RULES_BRIEF, /Iconic cards: only one can be controlled at a time/);
+  assert.match(RULES_BRIEF, /up to 4/);
+  assert.match(RULES_BRIEF, /no upgrade mechanic/i);
+  assert.match(RULES_BRIEF, /Opening hand is 5/);
+  assert.match(RULES_BRIEF, /INITIALIZE/);
+  assert.match(aiPrompt(emptyDeck('x')), /RAM deck/);
 });

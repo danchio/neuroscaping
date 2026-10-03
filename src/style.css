@@ -224,6 +224,8 @@ input:hover, select:hover, textarea:hover { border-color: var(--dim); }
 a.ref.cardref:hover { text-decoration-color: var(--signal); }
 .dmg { flex: none; }
 .cf-abs { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.ab { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ab-cost { color: var(--dim); font-size: 13px; }
 .cf-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 26px; margin-top: auto; }
 .rar { color: var(--faint); font-size: 12px; }
 .stat { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; background: var(--substrate); border: 1px solid var(--trace-hi); font: 700 17px/1.1 var(--display); }
