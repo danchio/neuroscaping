@@ -7,9 +7,11 @@ import { LIMITS } from '../lib/config.js';
 import { aiPrompt } from '../lib/share.js';
 import { $, $$, esc, onAct, toast, plural, keepFocus, copyText } from '../ui/dom.js';
 import { glyph, plusIcon, minusIcon, chevrons, markSvg } from '../ui/glyphs.js';
-import { cardFrame, costBox, glyphRow, statPlate, fvar, factionsStyle, sectionBanner, typeLine } from '../ui/card.js';
+import { costBox, glyphRow, statPlate, fvar, factionsStyle, sectionBanner, typeLine } from '../ui/card.js';
 import { meterHtml, mixBar, legalBadge, mfFactionOrder } from '../ui/parts.js';
 import { attachCombo } from '../ui/combo.js';
+import { cardImageHtml, keepImages } from '../ui/cardimg.js';
+import { stepper, imageTile } from '../ui/tiles.js';
 import { effective } from '../tagstore.js';
 import { groupByTag, deckTagBoost } from '../lib/tags.js';
 import { tagChips } from '../ui/tags.js';
@@ -21,7 +23,7 @@ import { mountSynergy } from './synergy.js';
 import { mountPlaytest } from './playtest.js';
 import { shareDialog, importDialog, mainframePicker, confirmDelete } from '../ui/dialogs.js';
 
-const view = { group: 'type', sort: 'ram', role: 'all', suggMax: 12 };
+const view = { group: 'type', sort: 'ram', role: 'all', suggMax: 12, mode: getPref('deckView', 'list') === 'visual' ? 'visual' : 'list' };
 let deckId = null;
 let previewId = null;
 
@@ -45,6 +47,7 @@ function groupsOf(entries) {
   return defs.map((g) => ({ ...g, rows: entries.filter((e) => g.test(e.c)).sort(cmp) })).filter((g) => g.rows.length);
 }
 
+const previewImage = (c) => `<button class="zoom pv-img" data-act="zoom" data-id="${c.id}" aria-label="Enlarge ${esc(titleCase(c.name))}">${cardImageHtml(c, { size: 'full', eager: true })}</button>`;
 const entriesOf = (zone) => Object.entries(zone).map(([id, n]) => ({ c: byId.get(Number(id)), n })).filter((e) => e.c);
 
 function rowHtml({ c, n }, zone, deck) {
@@ -60,6 +63,18 @@ function rowHtml({ c, n }, zone, deck) {
     ${over ? `<span class="overtag">Limit ${c.copyLimit}</span>` : '<span></span>'}
     <button class="mv" data-act="r-move" data-id="${c.id}" data-zone="${zone}" title="Move one to the ${other === 'side' ? 'sideboard' : 'cyberdeck'}" aria-label="Move one ${esc(titleCase(c.name))} to the ${other === 'side' ? 'sideboard' : 'cyberdeck'}">${zone === 'main' ? 'Side' : 'Main'}</button>
   </li>`;
+}
+
+function vtileBar(c, n, zone, deck) {
+  const atLimit = c.copyLimit > 0 && copiesOf(deck, c.id) >= c.copyLimit;
+  const other = zone === 'main' ? 'side' : 'main';
+  return stepper(c, n, { inc: 'r-inc', dec: 'r-dec', data: `data-zone="${zone}"`, atLimit })
+    + `<button class="mv" data-act="r-move" data-id="${c.id}" data-zone="${zone}" title="Move one to the ${other === 'side' ? 'sideboard' : 'cyberdeck'}" aria-label="Move one ${esc(titleCase(c.name))} to the ${other === 'side' ? 'sideboard' : 'cyberdeck'}">${zone === 'main' ? 'Side' : 'Main'}</button>`;
+}
+function vtileHtml({ c, n }, zone, deck) {
+  const limit = c.copyLimit > 0 && copiesOf(deck, c.id) > c.copyLimit;
+  const bar = vtileBar(c, n, zone, deck);
+  return imageTile(c, { n, bar, flag: limit ? `Limit ${c.copyLimit}` : '', cls: limit ? 'over' : '' });
 }
 
 export function mountDeck(root, id, tab = 'cards') {
@@ -82,7 +97,8 @@ export function mountDeck(root, id, tab = 'cards') {
     <div class="dgrid">
       <div class="dmain">
         <div class="lbar"><label for="g-group">Group by</label><select id="g-group"><option value="type">Type</option><option value="ram">RAM cost</option><option value="faction">Faction</option><option value="tag">Your tags</option></select>
-        <label for="g-sort">Sort by</label><select id="g-sort"><option value="ram">RAM cost</option><option value="name">Name</option></select><span id="g-note" class="g-note"></span></div>
+        <label for="g-sort">Sort by</label><select id="g-sort"><option value="ram">RAM cost</option><option value="name">Name</option></select><span id="g-note" class="g-note"></span>
+        <div class="seg-ctl lbar-view" role="group" aria-label="How to show the deck"><button data-act="d-view" data-val="list" aria-pressed="false">List</button><button data-act="d-view" data-val="visual" aria-pressed="false">Visual</button></div></div>
         <div id="d-list"></div>
         <div id="d-side"></div>
         <div id="d-notes"></div>
@@ -133,22 +149,23 @@ export function mountDeck(root, id, tab = 'cards') {
     if (!cid || cid === previewId) return;
     previewId = cid;
     const c = byId.get(cid);
-    $('#d-preview').innerHTML = cardFrame(c, { mode: 'full', link: false }) + `<a class="btn small ghost pv-more" href="${href.card(cid)}">Full details and what it works with</a>`;
+    $('#d-preview').innerHTML = previewImage(c) + `<a class="btn small ghost pv-more" href="${href.card(cid)}">Full details and what it works with</a>`;
   };
   const rowId = (t) => { const r = t.closest('[data-id]'); return r && r.closest('#d-list, #d-side, #d-sugg, #add-list') ? Number(r.dataset.id) : 0; };
   root.addEventListener('mouseover', (e) => showPreview(rowId(e.target)));
   root.addEventListener('focusin', (e) => showPreview(rowId(e.target)));
   root.addEventListener('keydown', (e) => {
-    const row = e.target.closest && e.target.closest('#d-list .row, #d-side .row');
+    const row = e.target.closest && e.target.closest('#d-list .row, #d-side .row, #d-list .itile, #d-side .itile');
     if (!row || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     const cid = Number(row.dataset.id);
     const zone = row.closest('#d-side') ? 'side' : 'main';
     if (e.key === '+' || e.key === '=') { e.preventDefault(); const r = change(deckId, zone, cid, 1); if (r.message) toast(r.message); }
     else if (e.key === '-' || e.key === '_') { e.preventDefault(); change(deckId, zone, cid, -1); }
-    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      const links = $$('#d-list .rname, #d-side .rname', root);
-      const i = links.indexOf(row.querySelector('.rname'));
-      const next = links[i + (e.key === 'ArrowDown' ? 1 : -1)];
+    else if (e.key.startsWith('Arrow')) {
+      const tile = row.classList.contains('itile');
+      const links = $$(tile ? '#d-list .itile-open, #d-side .itile-open' : '#d-list .rname, #d-side .rname', root);
+      const i = links.indexOf(row.querySelector(tile ? '.itile-open' : '.rname'));
+      const next = links[i + (e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0)];
       if (next) { e.preventDefault(); next.focus(); }
     }
   });
@@ -211,19 +228,49 @@ export function mountDeck(root, id, tab = 'cards') {
     booted = true;
   }
 
-  function paintList() {
+  let listKey = '';
+  /** Visual view, same cards as last time: change counts in place so the images are not rebuilt on every click. */
+  function patchVisual(d) {
+    const zones = { '#d-list': d.main, '#d-side': d.side };
+    for (const [sel, zone] of Object.entries(zones)) {
+      $$(`${sel} .itile`, root).forEach((t) => {
+        const c = byId.get(Number(t.dataset.id)), n = zone[c.id] || 0;
+        if (c.type === 'Mainframe') return;
+        const old = t.querySelector('.qb'); if (old) old.remove();
+        t.querySelector('.itile-open').insertAdjacentHTML('afterend', `<span class="qb" title="${n} in the deck"><span class="sr">${n} in deck: </span>&times;${n}</span>`);
+        const limit = c.copyLimit > 0 && copiesOf(d, c.id) > c.copyLimit;
+        t.classList.toggle('over', limit);
+        const fl = t.querySelector('.tflag'); if (fl) fl.remove();
+        if (limit) t.querySelector('.itile-open').insertAdjacentHTML('beforebegin', `<span class="tflag">Limit ${c.copyLimit}</span>`);
+        t.querySelector('.itile-bar').innerHTML = vtileBar(c, n, sel === '#d-side' ? 'side' : 'main', d);
+      });
+      $$(`${sel} section.grp`, root).forEach((g) => { const b = g.querySelector('.grp-h b'); if (b) b.textContent = $$('.itile', g).reduce((sum, t) => sum + (zone[t.dataset.id] || 0), 0); });
+    }
+  }
+
+  function paintList() { keepImages($('#d-list').parentElement, paintListNow); }
+  function paintListNow() {
     const d = D();
+    const visual = view.mode === 'visual';
+    $$('[data-act="d-view"]', root).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.val === view.mode)));
     const entries = entriesOf(d.main);
-    $('#g-note').textContent = view.group !== 'tag' ? '' : effective().tags.length ? 'A card with several tags shows under each.' : 'No tags yet. Open any card and add one under \u201cYour tags\u201d.';
-    $('#d-list').innerHTML = entries.length
-      ? groupsOf(entries).map((g) => `<section class="grp"><h3 class="grp-h"><span>${esc(g.title)}</span><b>${g.rows.reduce((s, r) => s + r.n, 0)}</b></h3><ul class="rows">${g.rows.map((r) => rowHtml(r, 'main', d)).join('')}</ul></section>`).join('')
-      : `<div class="empty-block"><h3>This deck has no cards yet</h3><p>Type a card name in the box above, or add from the suggestions on the right.${d.mainframe ? '' : ' Choose a mainframe first and the suggestions will fit it.'}</p></div>`;
     const side = entriesOf(d.side);
     const smf = d.sideMainframe && byId.get(d.sideMainframe);
     const sideSorted = side.sort((a, b) => (a.c.ram ?? -1) - (b.c.ram ?? -1) || a.c.name.localeCompare(b.c.name));
+    $('#g-note').textContent = view.group !== 'tag' ? '' : effective().tags.length ? 'A card with several tags shows under each.' : 'No tags yet. Open any card and add one under \u201cYour tags\u201d.';
+    const groups = groupsOf(entries);
+    const key = visual ? [view.group, view.sort, d.mainframe || 0, d.sideMainframe || 0, groups.map((g) => g.key + ':' + g.rows.map((r) => r.c.id).join('.')).join('|'), sideSorted.map((r) => r.c.id).join('.')].join('/') : '';
+    if (visual && key === listKey) { patchVisual(d); return; }
+    listKey = key;
+    const mfTile = d.mainframe && byId.get(d.mainframe);
+    const grid = (rows, zone) => `<div class="grid igrid vis">${rows.map((r) => vtileHtml(r, zone, d)).join('')}</div>`;
+    $('#d-list').innerHTML = entries.length
+      ? (visual && mfTile ? `<section class="grp"><h3 class="grp-h"><span>Mainframe</span></h3><div class="grid igrid vis">${imageTile(mfTile, { bar: `<button class="btn small" data-act="pick-mf" data-deck="${d.id}" data-slot="mainframe">Change</button>` })}</div></section>` : '')
+        + groups.map((g) => `<section class="grp"><h3 class="grp-h"><span>${esc(g.title)}</span><b>${g.rows.reduce((s, r) => s + r.n, 0)}</b></h3>${visual ? grid(g.rows, 'main') : `<ul class="rows">${g.rows.map((r) => rowHtml(r, 'main', d)).join('')}</ul>`}</section>`).join('')
+      : `<div class="empty-block"><h3>This deck has no cards yet</h3><p>Type a card name in the box above, or add from the suggestions on the right.${d.mainframe ? '' : ' Choose a mainframe first and the suggestions will fit it.'}</p></div>`;
     $('#d-side').innerHTML = `<section class="grp side">${sectionBanner('Sideboard', { count: `${total(d.side)} of ${LIMITS.sideMax}` })}
       ${smf ? `<p class="side-mf">Mainframe: <b>${esc(titleCase(smf.name))}</b> <button class="linkbtn" data-act="pick-mf" data-deck="${d.id}" data-slot="sideMainframe">Change</button></p>` : ''}
-      ${sideSorted.length ? `<ul class="rows">${sideSorted.map((r) => rowHtml(r, 'side', d)).join('')}</ul>` : '<p class="dim pad">Nothing here. Use “Side” on a row to move a card, or Shift + Enter in the add box.</p>'}</section>`;
+      ${sideSorted.length ? (visual ? grid(sideSorted, 'side') : `<ul class="rows">${sideSorted.map((r) => rowHtml(r, 'side', d)).join('')}</ul>`) : '<p class="dim pad">Nothing here. Use “Side” on a row to move a card, or Shift + Enter in the add box.</p>'}</section>`;
     $('#d-notes').innerHTML = `<section class="grp">${sectionBanner('Notes')}<label class="sr" for="d-notes-in">Deck notes</label><textarea id="d-notes-in" rows="4" placeholder="Game plan, matchups, what to swap in. Notes travel with share links.">${esc(d.notes || '')}</textarea></section>`;
   }
 
@@ -260,7 +307,7 @@ export function mountDeck(root, id, tab = 'cards') {
       const d = D();
       const mf = d.mainframe && byId.get(d.mainframe);
       $('#d-preview').innerHTML = mf
-        ? cardFrame(mf, { mode: 'full', link: false }) + '<p class="note pad">Hover or focus a card in the list to preview it here.</p>'
+        ? previewImage(mf) + '<p class="note pad">Hover or focus a card in the list to preview it here.</p>'
         : '<div class="empty-mini"><p>Hover or focus a card in the list to preview it here.</p></div>';
     }
   }
@@ -268,6 +315,7 @@ export function mountDeck(root, id, tab = 'cards') {
   return { refresh: () => { if (!getDeck(deckId)) { go(href.decks()); return; } keepFocus(paintAll); }, destroy() { sub && sub.destroy(); deckId = null; } };
 }
 
+onAct('d-view', (el) => { view.mode = el.dataset.val === 'visual' ? 'visual' : 'list'; setPref('deckView', view.mode); reg.view && reg.view.refresh(); });
 onAct('r-inc', (el) => { const r = change(deckId, el.dataset.zone, Number(el.dataset.id), 1); if (r.message) toast(r.message); });
 onAct('r-dec', (el) => { change(deckId, el.dataset.zone, Number(el.dataset.id), -1); });
 onAct('r-move', (el) => { const z = el.dataset.zone; const r = moveCard(deckId, z, z === 'main' ? 'side' : 'main', Number(el.dataset.id)); if (r.message) toast(r.message); });

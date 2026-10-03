@@ -7,6 +7,7 @@ import { esc, plural } from './dom.js';
 import { glyph, chevrons, checkIcon } from './glyphs.js';
 import { fvar, factionsStyle, rich, needText, MODE } from './card.js';
 import { href } from '../router.js';
+import { cardImageHtml } from './cardimg.js';
 
 export const mfFactionOrder = (mf) => {
   const order = [];
@@ -63,6 +64,7 @@ const mfTiersChips = (mf) => {
 export function mainframeTile(mf, { compact = false, decks = 0 } = {}) {
   const fs = mfFactionOrder(mf);
   return `<a class="mft${compact ? ' compact' : ''}" href="${href.mainframe(mf.id)}" style="${factionsStyle(fs)}"><span class="mft-edge"><span class="mft-in">
+    <span class="mft-art">${cardImageHtml(mf, { size: 'art', alt: '' })}</span>
     <span class="mft-glyphs">${fs.map((f) => `<span style="color:${fvar(f)}">${glyph(f, compact ? 22 : 28)}</span>`).join('')}</span>
     <span class="mft-name">${esc(titleCase(mf.name))}</span>
     ${compact ? '' : `<span class="mft-lead">${mf.mainframe.lead ? rich(mf.mainframe.lead, false) + ' ' : ''}${rich(mf.mainframe.tiers[0].text, false)}</span>`}

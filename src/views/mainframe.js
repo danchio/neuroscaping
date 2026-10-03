@@ -4,7 +4,9 @@ import { persistentFactionCounts, copiesOf, total } from '../lib/deck.js';
 import { suggestForMainframe } from '../lib/roles.js';
 import { $, esc, onAct, toast, plural, keepFocus } from '../ui/dom.js';
 import { glyph, plusIcon, chevrons } from '../ui/glyphs.js';
-import { cardFrame, rich, fvar, factionsStyle, sectionBanner } from '../ui/card.js';
+import { rich, fvar, factionsStyle, edgeStyle, sectionBanner } from '../ui/card.js';
+import { cardImageHtml, keepImages } from '../ui/cardimg.js';
+import { stepper } from '../ui/tiles.js';
 import { meterHtml, mfFactionOrder } from '../ui/parts.js';
 import { persistentCount } from './helpers.js';
 import { state, activeDeck, getDeck, newDeck, change, activate } from '../store.js';
@@ -34,11 +36,19 @@ export function mountMainframe(root, id) {
   const pool = persistentCount(fs);
   let booted = false;
 
+  /** Suggestion tile: the card image, one short reason underneath, then add and how many you have. */
   const tile = (it, deck) => {
-    const n = deck ? copiesOf(deck, it.card.id) : 0;
-    const foot = `<div class="sg-foot"><ul class="why">${it.why.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>
-      <div class="sg-act">${n ? `<span class="sg-have">${n} in deck</span>` : '<span></span>'}<button class="btn small primary" data-act="sugg-add" data-id="${it.card.id}">${plusIcon}Add</button></div></div>`;
-    return `<div class="cell">${cardFrame(it.card, { mode: 'tile', foot })}</div>`;
+    const c = it.card;
+    const n = deck ? copiesOf(deck, c.id) : 0;
+    const nm = esc(titleCase(c.name));
+    return `<article class="stile" data-id="${c.id}" style="${edgeStyle(c)}">
+      <div class="itile">
+        <a class="itile-open" href="${href.card(c.id)}" aria-label="${nm}, open details">${cardImageHtml(c, { size: 'tile' })}</a>
+        ${n ? `<span class="qb" title="${n} in the deck"><span class="sr">${n} in deck: </span>&times;${n}</span>` : ''}
+      </div>
+      <p class="why-line" title="${esc(it.why.join(' '))}">${esc(it.why[0] || '')}</p>
+      <div class="s-act">${n ? `<span class="sg-have">${n} in deck</span>` : '<span></span>'}<button class="btn small primary" data-act="sugg-add" data-id="${c.id}" aria-label="Add ${nm}">${plusIcon}Add</button></div>
+    </article>`;
   };
 
   const paint = () => {
@@ -54,10 +64,14 @@ export function mountMainframe(root, id) {
     root.innerHTML = `
       <header class="mf-hero" style="${factionsStyle(fs)}">
         <div class="mf-hero-in">
+          <div class="mf-id">
+          <button class="zoom mf-img" data-act="zoom" data-id="${mf.id}" aria-label="Enlarge ${esc(titleCase(mf.name))}">${cardImageHtml(mf, { size: 'full', eager: true })}</button>
+          <div class="mf-id-t">
           <p class="crumbs"><a href="${href.mainframes()}">Mainframes</a></p>
           <h1><span class="mf-glyphs">${fs.map((f) => `<span style="color:${fvar(f)}">${glyph(f, 40)}</span>`).join('')}</span>${esc(titleCase(mf.name))}</h1>
           ${mf.mainframe.lead ? `<p class="mf-lead">${rich(mf.mainframe.lead, false)}</p>` : ''}
-          <div class="row"><button class="btn primary big" data-act="start-deck" data-id="${mf.id}">${deck ? 'Start another deck' : `Start a ${esc(titleCase(mf.name))} deck`}</button>${deck ? `<a class="btn big" href="${href.deck(deck.id)}">Open ${esc(deck.name)}</a>` : ''}</div>
+          </div></div>
+          <div class="row mf-actions"><button class="btn primary big" data-act="start-deck" data-id="${mf.id}">${deck ? 'Start another deck' : `Start a ${esc(titleCase(mf.name))} deck`}</button>${deck ? `<a class="btn big" href="${href.deck(deck.id)}">Open ${esc(deck.name)}</a>` : ''}</div>
         </div>
         <div class="mf-hero-meter">
           <h2 class="plain">${deck ? 'Tiers in your deck' : 'Synergy tiers'}</h2>
@@ -76,7 +90,7 @@ export function mountMainframe(root, id) {
           return `<section aria-labelledby="h-${g.id}">
             ${sectionBanner(g.title, { id: `s-${g.id}`, count: g.items.length })}
             <p class="sec-note">${esc(g.hint)}</p>
-            <div class="grid sugg">${items.map((it) => tile(it, deck)).join('')}</div>
+            <div class="grid igrid sugg">${items.map((it) => tile(it, deck)).join('')}</div>
             ${g.items.length > PER ? `<button class="btn more" data-act="sec-more" data-id="${g.id}">${all ? `Show the top ${PER}` : `Show all ${g.items.length}`}</button>` : ''}
           </section>`;
         }).join('')}
@@ -85,7 +99,7 @@ export function mountMainframe(root, id) {
   };
   root.addEventListener('change', (e) => { if (e.target.id === 'm-tags') { setPref('preferTags', e.target.checked); keepFocus(paint); } });
   paint();
-  return { refresh: () => keepFocus(paint), destroy() { current = null; } };
+  return { refresh: () => keepFocus(() => keepImages(root, paint)), destroy() { current = null; } };
 }
 
 onAct('sec-more', (el) => { const id = el.dataset.id; open.has(id) ? open.delete(id) : open.add(id); reg.view && reg.view.refresh(); });

@@ -10,6 +10,7 @@ import { parseText } from '../lib/share.js';
 import { toast } from '../ui/dom.js';
 import { importDialog, mainframePicker } from '../ui/dialogs.js';
 import { go, href } from '../router.js';
+import { keepImages } from '../ui/cardimg.js';
 import { presetFilter } from './cards.js';
 
 const decksUsing = (id) => state.decks.filter((d) => d.mainframe === id).length;
@@ -47,7 +48,7 @@ export function mountHome(root) {
       </div>`;
   };
   paint();
-  return { refresh: paint, destroy() {} };
+  return { refresh: () => keepImages(root, paint), destroy() {} };
 }
 
 export function mountMainframes(root) {
@@ -64,7 +65,7 @@ export function mountMainframes(root) {
     </div>`;
   };
   paint();
-  return { refresh: paint, destroy() {} };
+  return { refresh: () => keepImages(root, paint), destroy() {} };
 }
 
 onAct('new-deck', () => { const d = newDeck('New deck'); go(href.deck(d.id)); setTimeout(() => mainframePicker(d.id), 30); });

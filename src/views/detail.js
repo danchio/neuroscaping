@@ -4,7 +4,8 @@ import { lens, describeWants } from '../lib/synergy.js';
 import { copiesOf } from '../lib/deck.js';
 import { $, esc, onAct, toast, plural, keepFocus } from '../ui/dom.js';
 import { plusIcon, minusIcon, closeIcon } from '../ui/glyphs.js';
-import { cardFrame, costBox, glyphRow, sectionBanner } from '../ui/card.js';
+import { costBox, glyphRow, sectionBanner, banner, typeLine, rulesHtml, edgeStyle } from '../ui/card.js';
+import { cardImageHtml } from '../ui/cardimg.js';
 import { activeDeck, change, newDeck, pickMainframe, setMainframeExact } from '../store.js';
 import { href, go } from '../router.js';
 import { effective, createTag, toggleCardTag } from '../tagstore.js';
@@ -34,6 +35,11 @@ function tagSection(c) {
   </section>`;
 }
 
+function abilitySection(c) {
+  if (!c.abilities) return '';
+  return `<section class="abil" aria-label="Ability costs"><h3 class="plain">Ability costs</h3>${c.abilities.map((a) => `<div class="ab-row">${banner(a, { text: true })}</div>`).join('')}</section>`;
+}
+
 function body(c) {
   const d = activeDeck();
   const L = lens(c);
@@ -52,8 +58,11 @@ function body(c) {
   }
   return `<div class="drawer-in">
     <button class="dlg-x" data-act="close-drawer" aria-label="Close card details">${closeIcon}</button>
-    ${cardFrame(c, { mode: 'full' })}
+    <button class="zoom" data-act="zoom" data-id="${c.id}" style="${edgeStyle(c)}" aria-label="Enlarge ${esc(titleCase(c.name))}">${cardImageHtml(c, { size: 'full', eager: true })}<span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button>
+    <div class="dhd"><h2 class="dname">${esc(titleCase(c.name))}</h2><p class="dtype">${typeLine(c)}</p><p class="drar">${esc(c.rarity)}${c.copyLimit ? `, max ${c.copyLimit}` : ', no copy limit'}</p></div>
     ${controls}
+    ${abilitySection(c)}
+    <details class="ctext"><summary>Card text</summary><div class="ct-body">${rulesHtml(c, { linkCards: true })}</div></details>
     ${c.type === 'Mainframe' ? '' : tagSection(c)}
     ${wants.length ? `<p class="wants"><b>Looks for:</b> ${wants.map(esc).join(', ')}.</p>` : ''}
     ${lensList('Works with', 'works', L.worksWith, 'This card does not mention other cards or factions.')}
@@ -70,11 +79,19 @@ export function openCard(id, close) {
   const changed = currentId !== id;
   currentId = id;
   el.setAttribute('aria-label', `${titleCase(c.name)} details`);
-  el.innerHTML = body(c);
+  render(el, c, !changed);
   if (!el.open) el.showModal();
   if (changed) el.scrollTop = 0;
 }
-export function refreshCard() { if (currentId && $('#drawer').open) { const el = $('#drawer'); const t = el.scrollTop; const c = byId.get(currentId); el.innerHTML = body(c); el.scrollTop = t; } }
+/** Repaint the drawer; for the same card keep the image element and the open "Card text", so nothing blinks. */
+function render(el, c, keep) {
+  const img = keep && el.querySelector('.zoom');
+  const text = keep && el.querySelector('details.ctext[open]');
+  el.innerHTML = body(c);
+  if (img) el.querySelector('.zoom').replaceWith(img);
+  if (text) el.querySelector('details.ctext').open = true;
+}
+export function refreshCard() { if (currentId && $('#drawer').open) { const el = $('#drawer'); const t = el.scrollTop; render(el, byId.get(currentId), true); el.scrollTop = t; } }
 export function closeCardQuiet() { const el = $('#drawer'); closing = true; if (el.open) el.close(); closing = false; currentId = null; }
 
 export function bindDrawer() {

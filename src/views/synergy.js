@@ -4,7 +4,8 @@ import { deckGraph, viewGraph, partnersOf, layoutGraph, mainframeLinks, STRENGTH
 import { suggestForDeck, SECTION_LABEL } from '../lib/roles.js';
 import { $, $$, esc, onAct, toast, keepFocus } from '../ui/dom.js';
 import { glyph, plusIcon, minusIcon } from '../ui/glyphs.js';
-import { costBox, fvar, glyphRow, sectionBanner } from '../ui/card.js';
+import { costBox, fvar, glyphRow, sectionBanner, edgeStyle } from '../ui/card.js';
+import { cardImageHtml, keepImages } from '../ui/cardimg.js';
 import { getDeck, change } from '../store.js';
 import { href } from '../router.js';
 import { reg } from './registry.js';
@@ -54,8 +55,9 @@ function sidePanel(deck, graph, v, min) {
     const ps = partnersOf(graph, n.id, min);
     const mf = mainframeLinks(deck, n.id);
     return `<div class="sp-head"><button class="linkbtn" data-act="syn-clear">All cards</button></div>
-      <h3 class="sp-name" style="--a:${cardEdge(n.card)}">${costBox(n.card)}<span>${esc(nm(n.card))}</span>${glyphRow(n.card, 15)}</h3>
-      <p class="sp-meta">${n.n} in the cyberdeck. <a href="${href.card(n.id)}">Full card</a></p>
+      <div class="sp-id"><button class="zoom sp-img" data-act="zoom" data-id="${n.id}" style="${edgeStyle(n.card)}" aria-label="Enlarge ${esc(nm(n.card))}">${cardImageHtml(n.card, { size: 'tile' })}</button>
+      <div class="sp-id-t"><h3 class="sp-name" style="--a:${cardEdge(n.card)}">${costBox(n.card)}<span>${esc(nm(n.card))}</span>${glyphRow(n.card, 15)}</h3>
+      <p class="sp-meta">${n.n} in the cyberdeck. <a href="${href.card(n.id)}">Full card</a></p></div></div>
       ${mf.length ? `<p class="sp-mf">Your mainframe cares about this card: ${esc(mf.join(', '))}.</p>` : ''}
       ${ps.length ? `<ul class="partners">${ps.map((p) => `<li><button class="pt" data-act="syn-pick" data-id="${p.card.id}" style="--a:${cardEdge(p.card)}"><span class="pt-top">${costBox(p.card)}<span class="rn">${esc(nm(p.card))}</span>${p.n > 1 ? `<span class="rk-n">x${p.n}</span>` : ''}</span><span class="pt-why">${whyChips(p.why)}</span></button></li>`).join('')}</ul>`
         : `<p class="dim pad">No partners at this strength. Try “All links”, or swap it for a card that fits.</p>`}`;
@@ -114,7 +116,7 @@ export function mountSynergy(root, deckId) {
         <p class="syn-sum"><b>${v.edges.length}</b> links among <b>${graph.nodes.length}</b> cards. ${esc(st.hint)}</p>
       </div>
       ${ui.mode === 'graph'
-        ? `<div class="syn-grid"><div class="syn-stage" id="syn-stage">${svgHtml(graph, v, lay)}</div><aside class="syn-side" id="syn-side" aria-live="polite">${sidePanel(d, graph, v, min)}</aside></div>`
+        ? `<div class="syn-grid"><div class="syn-stage" id="syn-stage"><div id="syn-tip" class="syn-tip" hidden></div>${svgHtml(graph, v, lay)}</div><aside class="syn-side" id="syn-side" aria-live="polite">${sidePanel(d, graph, v, min)}</aside></div>`
         : listHtml(graph, v, min)}
       <div class="syn-loose">${sectionBanner('Loose cards', { count: v.orphans.length })}${looseHtml(d, graph, v)}
         <p class="note">Links come from names, factions, tags and subtypes in rules text. A loose card can still be a fine card; it just does not mention, or get mentioned by, the rest of this deck.</p></div>
@@ -159,10 +161,25 @@ export function mountSynergy(root, deckId) {
     const hot = $$('.sn.hot', svg).sort((a, b) => (Number(b.dataset.n) === id) - (Number(a.dataset.n) === id) || byWeight(a, b));
     declutter(svg, hot, true);
   }
-  root.addEventListener('mouseover', (e) => { const g = e.target.closest('.sn'); if (g) applyFocus(Number(g.dataset.n)); });
-  root.addEventListener('mouseout', (e) => { if (e.target.closest('.sn')) applyFocus(ui.sel); });
-  root.addEventListener('focusin', (e) => { const g = e.target.closest('.sn'); if (g) applyFocus(Number(g.dataset.n)); });
-  root.addEventListener('focusout', (e) => { if (e.target.closest('.sn')) applyFocus(ui.sel); });
+  // A small picture of the card follows the dot you point at, so you do not need the label to know which card it is.
+  function showTip(g) {
+    const tip = $('#syn-tip', root), stage = $('#syn-stage', root);
+    if (!tip || !stage) return;
+    const c = byId.get(Number(g.dataset.n));
+    if (tip.dataset.n !== String(c.id)) { tip.dataset.n = String(c.id); tip.innerHTML = cardImageHtml(c, { size: 'tile', alt: 'short' }); }
+    tip.hidden = false;
+    const s = stage.getBoundingClientRect(), r = g.getBoundingClientRect();
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = r.right - s.left + 10;
+    if (x + w > s.width - 6) x = r.left - s.left - w - 10;
+    const y = Math.max(6, Math.min(s.height - h - 6, r.top - s.top + r.height / 2 - h / 2));
+    tip.style.transform = `translate(${Math.max(6, x)}px, ${y}px)`;
+  }
+  const hideTip = () => { const tip = $('#syn-tip', root); if (tip) tip.hidden = true; };
+  root.addEventListener('mouseover', (e) => { const g = e.target.closest('.sn'); if (g) { applyFocus(Number(g.dataset.n)); showTip(g); } });
+  root.addEventListener('mouseout', (e) => { if (e.target.closest('.sn')) { applyFocus(ui.sel); hideTip(); } });
+  root.addEventListener('focusin', (e) => { const g = e.target.closest('.sn'); if (g) { applyFocus(Number(g.dataset.n)); showTip(g); } });
+  root.addEventListener('focusout', (e) => { if (e.target.closest('.sn')) { applyFocus(ui.sel); hideTip(); } });
   root.addEventListener('click', (e) => { const g = e.target.closest('.sn'); if (g) select(Number(g.dataset.n)); });
   root.addEventListener('keydown', (e) => { const g = e.target.closest('.sn'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); select(Number(g.dataset.n)); } if (e.key === 'Escape' && ui.sel) { ui.sel = null; paint(); } });
 
@@ -175,9 +192,9 @@ export function mountSynergy(root, deckId) {
     $$('.sn', root).forEach((g) => g.removeAttribute('aria-pressed'));
     if (ui.sel) { const g = $(`.sn[data-n="${ui.sel}"]`, root); g && g.setAttribute('aria-pressed', 'true'); }
   }
-  reg.syn = { select, repaint: () => keepFocus(paint) };
+  reg.syn = { select, repaint: () => keepFocus(() => keepImages(root, paint)) };
   paint();
-  return { refresh: () => keepFocus(paint), destroy() { reg.syn = null; } };
+  return { refresh: () => keepFocus(() => keepImages(root, paint)), destroy() { reg.syn = null; } };
 }
 
 onAct('syn-strength', (el) => { ui.strength = el.dataset.id; reg.syn && reg.syn.repaint(); });

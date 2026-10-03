@@ -4,7 +4,8 @@ import { total } from '../lib/deck.js';
 import { GROUP_KINDS, groupOptions, groupSize, oddsByTurn, newGame, mulligan, drawTurn, turnDraws, OPENING_HAND } from '../lib/odds.js';
 import { $, $$, esc, onAct } from '../ui/dom.js';
 import { plusIcon, minusIcon } from '../ui/glyphs.js';
-import { cardFrame, sectionBanner } from '../ui/card.js';
+import { sectionBanner, edgeStyle } from '../ui/card.js';
+import { cardImageHtml, keepImages } from '../ui/cardimg.js';
 import { effective } from '../tagstore.js';
 import { getDeck } from '../store.js';
 import { href } from '../router.js';
@@ -62,8 +63,15 @@ function handHtml(d) {
     const c = byId.get(x.id);
     const on = pt.marked.has(x.uid);
     const fresh = g.fresh.includes(x.uid);
-    const foot = `<div class="h-foot">${fresh ? '<span class="h-new">New</span>' : '<span></span>'}${g.turn === 0 ? `<button class="btn small" data-act="pt-mark" data-id="${x.uid}" aria-pressed="${on}" aria-label="${on ? 'Keep' : 'Send back'} ${esc(titleCase(c.name))}">${on ? 'Sending back' : 'Send back'}</button>` : ''}</div>`;
-    return `<div class="cell${on ? ' marked' : ''}">${cardFrame(c, { mode: 'tile', cls: 'mini', foot })}</div>`;
+    const nm = esc(titleCase(c.name));
+    return `<div class="hcard${on ? ' marked' : ''}" data-id="${c.id}" style="${edgeStyle(c)}">
+      <div class="itile">
+        <a class="itile-open" href="${href.card(c.id)}" aria-label="${nm}, open details">${cardImageHtml(c, { size: 'tile', eager: true })}</a>
+        ${fresh ? '<span class="tflag new">New</span>' : ''}
+        ${on ? '<span class="sendback" aria-hidden="true">Sending back</span>' : ''}
+      </div>
+      ${g.turn === 0 ? `<button class="btn small" data-act="pt-mark" data-id="${x.uid}" aria-pressed="${on}" aria-label="${on ? 'Keep' : 'Send back'} ${nm}">${on ? 'Keep it' : 'Send back'}</button>` : ''}
+    </div>`;
   }).join('');
   return `${sectionBanner('Sample hand', { count: g.hand.length })}${controls}
     <p class="h-status" role="status">${esc(status)}${stale ? ' <b>The deck has changed since this hand was drawn.</b> Draw a new hand to include the change.' : ''}</p>
@@ -91,7 +99,7 @@ export function mountPlaytest(root, deckId) {
   const repaintHand = () => {
     const d = getDeck(deckId); const a = document.activeElement;
     const sel = a && a.dataset && a.dataset.act ? `[data-act="${a.dataset.act}"]${a.dataset.id != null ? `[data-id="${a.dataset.id}"]` : ''}${a.dataset.val != null ? `[data-val="${a.dataset.val}"]` : ''}` : '';
-    $('#pt-hand', root).innerHTML = handHtml(d);
+    keepImages($('#pt-hand', root), () => { $('#pt-hand', root).innerHTML = handHtml(d); });
     const again = sel ? $(sel, root) : null;
     again && !again.disabled && again.focus({ preventScroll: true });
   };
