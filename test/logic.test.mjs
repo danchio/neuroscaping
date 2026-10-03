@@ -485,3 +485,47 @@ test('mainframe suggestions split removal, damage and disruption', () => {
   for (const t of ['Removal', 'Direct damage', 'Disruption']) assert.ok(titles.includes(t), t);
   assert.ok(!titles.includes('Removal and damage'));
 });
+
+// ---- filters in the URL ----
+import { blankFilters, encodeFilters, decodeFilters } from '../src/lib/filters.js';
+import { RARITIES } from '../src/lib/cards.js';
+import { split, parse, href } from '../src/router.js';
+
+test('filters: round trip through a query string', () => {
+  const F = blankFilters();
+  F.q = 'draw 2'; F.types.add('Character'); F.factions.add('Hacker'); F.factions.add('Mystic'); F.ram.add(1); F.ram.add(8);
+  F.subtypes.add('Script'); F.tags.add('Robot'); F.mytags.add('draw-engine'); F.rarity.add(RARITIES[0]); F.iconic = true; F.hasAbility = true; F.inDeck = true;
+  const qs = encodeFilters(F, 'name');
+  assert.match(qs, /fac=Hacker,Mystic/);
+  assert.ok(!qs.includes('inDeck') && !/deck/.test(qs), 'your deck is not part of a shared link');
+  const { F: back, sort } = decodeFilters(qs, RARITIES);
+  assert.equal(sort, 'name');
+  for (const k of ['types', 'factions', 'subtypes', 'tags', 'mytags', 'rarity', 'ram']) assert.deepEqual([...back[k]].sort(), [...F[k]].sort(), k);
+  assert.equal(back.q, 'draw 2'); assert.ok(back.iconic && back.hasAbility && !back.inDeck);
+  assert.equal(encodeFilters(blankFilters()), '');
+  assert.equal(encodeFilters(blankFilters(), 'id'), '');
+});
+
+test('filters: unknown or hostile values are dropped', () => {
+  const { F, sort } = decodeFilters('fac=Hacker,Nope&type=Mainframe,<script>&ram=1,99,x&sort=weird&my=ok-tag,Bad Tag!&tag=Robot,Zzz', RARITIES);
+  assert.deepEqual([...F.factions], ['Hacker']);
+  assert.deepEqual([...F.types], ['Mainframe']);
+  assert.deepEqual([...F.ram], [1]);
+  assert.deepEqual([...F.mytags], ['ok-tag']);
+  assert.deepEqual([...F.tags], ['Robot']);
+  assert.equal(sort, 'id');
+  assert.equal(decodeFilters('').F.q, '');
+});
+
+test('router: query strings and deck tabs', () => {
+  assert.deepEqual(parse('#/cards?fac=Hacker'), { name: 'cards' });
+  assert.equal(split('#/cards?fac=Hacker&q=a%20b').query.get('q'), 'a b');
+  assert.equal(split('#/cards').path, 'cards');
+  assert.deepEqual(parse('#/deck/abc'), { name: 'deck', id: 'abc', tab: 'cards' });
+  assert.deepEqual(parse('#/deck/abc/synergy'), { name: 'deck', id: 'abc', tab: 'synergy' });
+  assert.deepEqual(parse('#/deck/abc/playtest'), { name: 'deck', id: 'abc', tab: 'playtest' });
+  assert.deepEqual(parse('#/deck/abc/bogus'), { name: 'deck', id: 'abc', tab: 'cards' });
+  assert.equal(href.deck('x'), '#/deck/x'); assert.equal(href.deck('x', 'playtest'), '#/deck/x/playtest');
+  assert.equal(href.cards('fac=Hacker'), '#/cards?fac=Hacker');
+  assert.deepEqual(parse('#/card/12'), { name: 'card', id: 12 });
+});

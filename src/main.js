@@ -77,9 +77,10 @@ function route() {
     return;
   }
   closeCardQuiet();
-  const key = hash || '#/decks';
-  lastMain = key; lastKind = r.name;
+  const key = (hash || '#/decks').split('?')[0]; // a view's own filters live in the query and must not remount it
+  lastMain = hash || '#/decks'; lastKind = r.name;
   if (key !== mountedKey) { mountedKey = key; mountRoute(r); window.scrollTo(0, 0); }
+  else if (reg.view && reg.view.onHash) reg.view.onHash();
   renderBar(r);
   document.title = pageTitle(r);
 }

@@ -6,13 +6,14 @@ import { $, esc, onAct, toast, keepFocus } from '../ui/dom.js';
 import { glyph, plusIcon, minusIcon } from '../ui/glyphs.js';
 import { cardFrame, fvar } from '../ui/card.js';
 import { activeDeck, change } from '../store.js';
-import { href } from '../router.js';
+import { href, parse, split } from '../router.js';
+import { blankFilters, encodeFilters, decodeFilters, hasQuery } from '../lib/filters.js';
 import { tagToggle } from '../ui/tags.js';
 import { effective } from '../tagstore.js';
 import { hasAnyTag, usage } from '../lib/tags.js';
 import { titleCase } from '../lib/cards.js';
 
-const blank = () => ({ q: '', types: new Set(), factions: new Set(), subtypes: new Set(), tags: new Set(), mytags: new Set(), rarity: new Set(), ram: new Set(), iconic: false, hasAbility: false, inDeck: false });
+const blank = blankFilters;
 let F = blank();
 let sort = 'id';
 let railOpen = false;
@@ -66,6 +67,17 @@ function tileFoot(c, deck) {
 }
 
 export function mountCards(root) {
+  // A link with filters in it wins over whatever this browser last had.
+  const incoming = split().query;
+  if (hasQuery(incoming)) { const r = decodeFilters(incoming, RARITIES); F = r.F; sort = r.sort; }
+  let written = '';
+  /** Keep the address bar in step with the filters (no history entry per click), so the link can be shared. */
+  function writeHash() {
+    if (parse().name !== 'cards') return;
+    written = encodeFilters(F, sort);
+    const h = href.cards(written);
+    if (location.hash !== h) history.replaceState(null, '', location.pathname + location.search + h);
+  }
   root.innerHTML = `<div class="cards-page">
     <aside class="rail" aria-label="Filters"><div class="rail-in" id="c-rail"></div></aside>
     <section class="cards-main" aria-label="Cards">
@@ -101,6 +113,7 @@ export function mountCards(root) {
     if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
     else if (sort === 'ram') list.sort((a, b) => (a.ram ?? 99) - (b.ram ?? 99) || a.name.localeCompare(b.name));
     else if (sort === 'fit') { const fit = new Map(suggestForDeck(deck || { main: {}, side: {} }, 999).map((s, i) => [s.card.id, i])); list.sort((a, b) => (fit.get(a.id) ?? 9999) - (fit.get(b.id) ?? 9999) || a.id - b.id); }
+    writeHash();
     $('#c-count').textContent = `${list.length} ${list.length === 1 ? 'card' : 'cards'}`;
     $('#c-deck').innerHTML = deck ? `Adding to <a href="${href.deck(deck.id)}">${esc(deck.name)}</a>` : 'You have no deck yet. <button class="linkbtn" data-act="new-deck">Start one</button> to add cards from here.';
     $('#c-grid').innerHTML = list.length
@@ -108,7 +121,21 @@ export function mountCards(root) {
       : '<div class="empty-block"><h3>No cards match</h3><p>Remove a filter or change the search words.</p><button class="btn" data-act="c-reset">Clear all filters</button></div>';
   }
   paintRail(); paintGrid();
-  return { refresh: () => keepFocus(() => { paintRail(); paintGrid(); }), repaintAll: () => { paintRail(); paintGrid(); }, destroy() {} };
+  return {
+    refresh: () => keepFocus(() => { paintRail(); paintGrid(); }),
+    repaintAll: () => { paintRail(); paintGrid(); },
+    /** The hash changed under us (pasted link, back button). */
+    onHash() {
+      const q = split().query;
+      if (!hasQuery(q)) { writeHash(); return; }
+      const r = decodeFilters(q, RARITIES);
+      if (encodeFilters(r.F, r.sort) === written) return;
+      F = r.F; sort = r.sort;
+      $('#cq').value = F.q; $('#csort').value = sort;
+      paintRail(); paintGrid();
+    },
+    destroy() {},
+  };
 }
 
 export function bindActions(getView) {

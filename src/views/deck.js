@@ -16,6 +16,7 @@ import { tagChips } from '../ui/tags.js';
 import { getPref, setPref, getDeck, setDeck, activate, change, moveCard, pickMainframe, setMainframeExact, duplicateDeck } from '../store.js';
 import { href, go } from '../router.js';
 import { reg } from './registry.js';
+import { tierStatus } from '../lib/synergy.js';
 import { mountSynergy } from './synergy.js';
 import { mountPlaytest } from './playtest.js';
 import { shareDialog, importDialog, mainframePicker, confirmDelete } from '../ui/dialogs.js';
@@ -74,7 +75,7 @@ export function mountDeck(root, id, tab = 'cards') {
   const cardsTab = `<section id="d-stats" class="strip" aria-label="Deck statistics"></section>
     <div class="addbar">
       <label class="sr" for="add">Add a card by name</label>
-      <div class="add-field"><span class="add-ic">${plusIcon}</span><input id="add" type="text" autocomplete="off" spellcheck="false" placeholder="Add a card: a name, or \u201c3 admin\u201d + Enter">
+      <div class="add-field"><span class="add-ic">${plusIcon}</span><input id="add" type="text" autocomplete="off" spellcheck="false" placeholder="Add a card: a name, or \u201c3 admin\u201d">
       <ul id="add-list" class="combo" hidden></ul></div>
       <p class="hint">Press <kbd>/</kbd> to jump here. <kbd>Shift</kbd> + <kbd>Enter</kbd> adds to the sideboard. A mainframe name sets the mainframe.</p>
     </div>
@@ -161,19 +162,28 @@ export function mountDeck(root, id, tab = 'cards') {
       : `<button class="btn hazard" data-act="pick-mf" data-deck="${d.id}" data-slot="mainframe">Choose a mainframe</button>`;
     const el = $('#d-head');
     const hadName = document.activeElement && document.activeElement.id === 'd-name';
+    const counts = persistentFactionCounts(d);
+    const tiers = mf ? tierStatus(mf, counts) : [];
+    const met = tiers.filter((t) => t.met).length;
     el.innerHTML = `<div class="dh-row">
       <div class="dh-name"><label class="sr" for="d-name">Deck name</label><input id="d-name" class="name-input" value="${esc(d.name)}" maxlength="60" autocomplete="off"></div>
       <div class="dh-actions">
         <button class="btn primary" data-act="open-share" data-deck="${d.id}">Share</button>
-        <button class="btn" data-act="copy-ai" data-deck="${d.id}">Copy for AI</button>
-        <button class="btn" data-act="copy-text" data-deck="${d.id}">Export</button>
-        <button class="btn" data-act="open-import">Import</button>
+        <button class="btn desk" data-act="copy-ai" data-deck="${d.id}">Copy for AI</button>
+        <button class="btn desk" data-act="copy-text" data-deck="${d.id}">Export</button>
+        <button class="btn desk" data-act="open-import">Import</button>
         <details class="menu"><summary class="btn" aria-label="More deck actions">More</summary><div class="menu-pop">
+          <button class="phone-only" data-act="copy-ai" data-deck="${d.id}">Copy for AI</button>
+          <button class="phone-only" data-act="copy-text" data-deck="${d.id}">Copy deck list</button>
+          <button class="phone-only" data-act="open-import">Import a list</button>
           <button data-act="dup-deck" data-deck="${d.id}">Duplicate deck</button>
           <button data-act="pick-mf" data-deck="${d.id}" data-slot="sideMainframe">Sideboard mainframe</button>
           <button class="danger" data-act="ask-delete" data-deck="${d.id}">Delete deck</button></div></details>
       </div></div>
-      <div class="dh-row sub">${mfChip}${legalBadge(d)}<span class="dh-count"><b>${v.mainCount}</b> of ${LIMITS.mainMin} minimum${v.mainCount < LIMITS.mainMin ? '' : ' reached'}${v.sideCount ? `, ${v.sideCount} in sideboard` : ''}</span></div>
+      <div class="cstrip">
+        <div class="dh-row sub">${mfChip}${legalBadge(d)}<span class="dh-count"><b>${v.mainCount}</b> of ${LIMITS.mainMin} minimum${v.mainCount < LIMITS.mainMin ? '' : ' reached'}${v.sideCount ? `, ${v.sideCount} in sideboard` : ''}</span></div>
+        ${mf ? `<div class="cs-meter">${meterHtml(mf, counts, { showTiers: false })}<p class="cs-tiers"><b>${met} of ${tiers.length}</b> mainframe tiers unlocked</p></div>` : ''}
+      </div>
       ${v.ok ? '' : `<ul class="issues" aria-label="Why this deck is not legal yet">${v.issues.map((i) => `<li>${esc(i.text)}</li>`).join('')}</ul>`}`;
     if (hadName) $('#d-name').focus();
   }
@@ -186,15 +196,18 @@ export function mountDeck(root, id, tab = 'cards') {
     const withF = entriesOf(d.main).reduce((s, e) => s + (e.c.factions.length ? e.n : 0), 0);
     const legend = FACTIONS.filter((f) => st.factions[f]).sort((a, b) => st.factions[b] - st.factions[a]);
     const types = ['Character', 'Program', 'Gear'].filter((t) => st.byType[t]).map((t) => `${st.byType[t]} ${t === 'Gear' ? 'gear' : t.toLowerCase() + (st.byType[t] === 1 ? '' : 's')}`);
+    const phone = matchMedia('(max-width: 720px)').matches;
+    const prev = $$('#d-stats details').map((x) => x.open);
+    const o = (i) => ((prev[i] ?? !phone) ? ' open' : '');
     $('#d-stats').innerHTML = `
-      <div class="cell meter-cell"><h2 class="plain">Mainframe tiers</h2>
+      <details class="cell meter-cell statbox"${o(0)}><summary><h2 class="plain">Mainframe tiers</h2></summary>
         ${mf ? meterHtml(mf, counts, { boot: !booted }) : `<div class="empty-mini"><p>Choose a mainframe to see which effects your cards unlock.</p><button class="btn small" data-act="pick-mf" data-deck="${d.id}" data-slot="mainframe">Choose a mainframe</button></div>`}
-        ${mf ? '<p class="note">Counts persistent cards in the cyberdeck. In play you will have fewer, so aim above each tier.</p>' : ''}</div>
-      <div class="cell"><h2 class="plain">RAM curve${st.avgRam ? ` <span class="avg">average ${st.avgRam.toFixed(1)}</span>` : ''}</h2>
-        <div class="curve" role="img" aria-label="RAM curve: ${RAM_KEYS.map((k) => `${st.curve[k] || 0} at ${k === 8 ? '8 or more' : k}`).join(', ')}">${RAM_KEYS.map((k) => `<div class="cv"><span class="cv-n">${st.curve[k] || ''}</span><i style="height:${((st.curve[k] || 0) / maxC) * 100}%"></i><span class="cv-l">${k === 8 ? '8+' : k}</span></div>`).join('')}</div></div>
-      <div class="cell"><h2 class="plain">Factions</h2>${mixBar(st.factions, Math.max(0, mainCount - withF))}
+        ${mf ? '<p class="note">Counts persistent cards in the cyberdeck. In play you will have fewer, so aim above each tier.</p>' : ''}</details>
+      <details class="cell statbox"${o(1)}><summary><h2 class="plain">RAM curve${st.avgRam ? ` <span class="avg">average ${st.avgRam.toFixed(1)}</span>` : ''}</h2></summary>
+        <div class="curve" role="img" aria-label="RAM curve: ${RAM_KEYS.map((k) => `${st.curve[k] || 0} at ${k === 8 ? '8 or more' : k}`).join(', ')}">${RAM_KEYS.map((k) => `<div class="cv"><span class="cv-n">${st.curve[k] || ''}</span><i style="height:${((st.curve[k] || 0) / maxC) * 100}%"></i><span class="cv-l">${k === 8 ? '8+' : k}</span></div>`).join('')}</div></details>
+      <details class="cell statbox"${o(2)}><summary><h2 class="plain">Factions</h2></summary>${mixBar(st.factions, Math.max(0, mainCount - withF))}
         <ul class="legend">${legend.map((f) => `<li style="color:${fvar(f)}">${glyph(f, 14)}<span>${esc(f)}</span><b>${st.factions[f]}</b></li>`).join('') || '<li class="dim">No faction cards yet.</li>'}</ul>
-        ${types.length ? `<p class="note">${types.join(', ')}</p>` : ''}</div>`;
+        ${types.length ? `<p class="note">${types.join(', ')}</p>` : ''}</details>`;
     booted = true;
   }
 
