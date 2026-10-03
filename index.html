@@ -3,73 +3,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#06090E">
   <title>Neuroscape Deck Lab</title>
-  <meta name="description" content="Unofficial fan tool: browse Neuroscape Genesis cards, find synergies, build and share decks.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312162B'/%3E%3Cpath d='M7 22V10h5l8 8V10h5v12h-5l-8-8v8z' fill='%232B59FF'/%3E%3Ccircle cx='25' cy='8' r='3' fill='%23E5334B'/%3E%3C/svg%3E">
+  <meta name="description" content="Unofficial fan tool: build Neuroscape Genesis decks around their mainframe, find synergies, check legality and share lists.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 2h22v22l-6 6H2V8z' fill='%230D131A' stroke='%2319E3B1' stroke-width='2'/%3E%3Cpath d='M9 22V10h3.5l7 7.5V10H23v12h-3.5l-7-7.5V22z' fill='%23E6EDF3'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
-  <header class="top">
-    <div class="brand">
-      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#12162B"/><path d="M7 22V10h5l8 8V10h5v12h-5l-8-8v8z" fill="#2B59FF"/><circle cx="25" cy="8" r="3" fill="#E5334B"/></svg>
-      <div><h1>Deck Lab</h1><p>Neuroscape Genesis, fan-made</p></div>
+  <a class="skip" href="#view">Skip to content</a>
+  <header class="bar">
+    <a class="brand" href="#/decks" aria-label="Deck Lab, home"><span id="brand-mark"></span><span class="brand-t">Deck Lab</span></a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#/decks" data-nav="decks">Decks</a>
+      <a href="#/mainframes" data-nav="mainframes">Mainframes</a>
+      <a href="#/cards" data-nav="cards">Cards</a>
+    </nav>
+    <div class="gsearch">
+      <label class="sr" for="gq">Search all cards by name</label>
+      <input id="gq" type="text" placeholder="Search cards" autocomplete="off" spellcheck="false">
+      <kbd title="Press / to search">/</kbd>
+      <ul id="g-list" class="combo" hidden></ul>
     </div>
-    <div class="deckbar">
-      <label class="sr" for="deck-select">Deck</label>
-      <select id="deck-select"></select>
-      <button class="btn" data-act="new-deck">New deck</button>
-      <button class="btn ghost" data-act="dup-deck">Duplicate</button>
-      <button class="btn ghost" data-act="del-deck">Delete</button>
-    </div>
-    <div class="top-actions">
-      <button class="btn" data-act="open-import">Import</button>
-      <button class="btn primary" data-act="open-share">Share</button>
-    </div>
+    <a id="bar-deck" class="deck-chip" href="#/decks" hidden></a>
   </header>
-
-  <nav class="viewtabs" aria-label="Sections">
-    <button data-view="browse">Cards</button>
-    <button data-view="deck">Deck</button>
-    <button data-view="card">Card</button>
-  </nav>
-
-  <main class="app" data-view="browse">
-    <aside class="filters" aria-label="Filters">
-      <div class="search">
-        <label class="sr" for="q">Search cards</label>
-        <input id="q" type="search" placeholder="Search name or rules text" autocomplete="off">
-        <kbd title="Press / to search">/</kbd>
-      </div>
-      <div id="filter-chips"></div>
-    </aside>
-
-    <section class="browse" aria-label="Cards">
-      <div class="browse-bar">
-        <p id="result-count" role="status"></p>
-        <label for="sort">Sort</label>
-        <select id="sort">
-          <option value="id">Set order</option>
-          <option value="name">Name</option>
-          <option value="ram">RAM cost</option>
-          <option value="fit">Best fit for deck</option>
-        </select>
-      </div>
-      <div id="grid" class="grid"></div>
-    </section>
-
-    <aside class="side" aria-label="Deck and card detail">
-      <div class="sidetabs" role="tablist">
-        <button role="tab" data-side="deck">Deck <span id="deck-badge"></span></button>
-        <button role="tab" data-side="card">Card</button>
-      </div>
-      <div id="deck-pane" class="pane"></div>
-      <div id="card-pane" class="pane"></div>
-    </aside>
-  </main>
-
+  <main id="view" tabindex="-1"></main>
+  <footer class="foot">Unofficial fan project. Not affiliated with Neuroscape, LLC. Card names and text belong to their owners.</footer>
+  <dialog id="drawer" class="drawer"></dialog>
   <dialog id="dlg"></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="src/main.js"></script>
