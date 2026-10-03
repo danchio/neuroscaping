@@ -120,3 +120,19 @@ New components, all built from the same frame and banner:
 - **First-run Home**: three numbered steps (a real sequence, so numbering is justified) and one primary action.
 
 Assumptions shown in the UI rather than hidden: odds assume all draws come from the cyberdeck and the RAM deck is not modelled; synergy weights are heuristic; role labels come from regexes on rules text.
+
+## Card images pass
+
+Request: use the real card images instead of card text, easier on the eyes.
+
+- **Images are the content, the app is the frame around them.** Real cards have rounded corners, so images are never put in the notched frame. The established language stays around them: a thin faction-coloured ring (gradient for dual faction) on hover and focus, the notched `x N` badge, chevron section banners, the dark chassis. The notched frame is kept for the text-card fallback only.
+- **No layout shift.** Every image sits in a 5:7 box that exists before the picture arrives. While loading it is an empty card outline in the card's faction colour; a slow sweep starts only if loading takes more than a third of a second.
+- **Cards browser**: image grid (about 6 columns on a laptop, 2 on a phone). A count badge hangs off the top-right corner so it covers as little art as possible. The stepper floats over the bottom of the image on hover/focus; on touch and phones it is a bar under the image. Images / List toggle; List is a compact row with the rules text on one line.
+- **Drawer**: large image first (tap to enlarge to a lightbox that fits the window), then controls, ability costs, tags, synergy lens. Rules text is a collapsed "Card text".
+- **Deck page**: the dense list stays the editing default. The preview pane shows the image. A Visual toggle shows the deck as image tiles grouped like the list, with the mainframe first.
+- **Mainframe page**: the mainframe image sits in the header beside its name; the tier meter and tier text stay in the right panel. Suggestions are image tiles with one short reason underneath and an Add button.
+- **Home**: mainframe tiles use the top ~45% of the card as artwork, slightly over-scaled so the rounded corners are cropped away. Falls back to the faction glyphs.
+- **Sample hand**: real images, larger; "Send back" dims the card.
+- **Synergy map**: a small image follows the dot you point at; the side panel shows the selected card.
+- **Failure chain**: publisher bucket, then fan CDN, then the text card (same footprint, so nothing moves). Offline or blocked still gives a complete app.
+- **Performance**: `loading=lazy`, no eager 255 images, in-place updates of counts so steppers do not rebuild pictures, `keepImages` to carry loaded images across repaints.

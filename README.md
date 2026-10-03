@@ -13,6 +13,7 @@ Once GitHub Pages is on, the site is at `https://<your-user>.github.io/<repo>/`.
 - **Cards page links**: filters are kept in the address, so a filtered view can be bookmarked or shared.
 - **First visit**: Home explains three steps and offers an example deck.
 - **Ability costs** read like the rulebook: "Run 2 RAM and run this character" means two separate costs (run 2 RAM, and rotate the character).
+- **Card images**: wherever a card is shown, the app shows the real card art. The cards page is an image grid (Images / List toggle, +/- on hover, always visible on phones). The card drawer shows the card large (click to enlarge, Esc closes) with the rules text in a collapsed "Card text" section. The deck page keeps the dense list and has a Visual view (image grid by type). Suggestions, the sample hand and the synergy map use images too. If images cannot load (offline, blocked), every card falls back to a text card, so nothing is lost.
 - **Cards**: filter by type, faction, RAM cost, subtype, tag and rarity or search rules text. Open a card to see what it works with and what asks for it.
 - **Your tags**: make your own tags ("ramp", "burst", "draw engine") from any card's details, filter the Cards page by them, show them on deck rows, group a deck by them, and let suggestions prefer cards that share a tag with your deck. Tags stay in your browser. **My data** (top right) manages tags and downloads or imports one backup file with all decks and tags; importing merges and never overwrites. To share tags with the playgroup, commit them to `data/my_tags.json` (same shape; ask your Claude to fill it in). Your own edits layer on top of that file.
 - **Share**: copy a link, a plain-text list, or "Copy for AI" (deck + card text + rules, to paste into any AI chat). Anyone can import a list back.
@@ -30,9 +31,12 @@ npm test                   # logic tests (Node 20+)
 ## Update card data
 Edit `data/genesis.csv`, `data/mainframes.json` or `data/abilities_raw.txt`, then `node scripts/build-data.mjs` and commit `src/data/cards.js`.
 
+## Card images (hotlinked)
+Images are **not stored in this repo**. They are loaded from Neuroscape's own storage (`storage.googleapis.com/spicerack_media/cards/neuroscape/GEN-<id>.webp`) with a fan CDN as backup (`static.playset.pro/neuroscape/cards/en/GEN-<id>.webp`), the way fan tools commonly do. `<id>` is the card's `id` in the data. Card images and names belong to Neuroscape, LLC; the footer says so. If a source goes away, edit `src/lib/cardimg.js`. Screenshots in `docs/screenshots/` that end in `-placeholder` use generated stand-in images, not real art.
+
 ## Notes
 - Design notes are in `docs/design.md`.
 - Faction synergy counts persistent cards in your cyberdeck (Characters, Gear, Protocol / Environment / Datashard programs). That is an assumption; change it in `src/lib/config.js`.
 - Synergy links come from brackets and keywords in rules text. They show which cards mention each other, not whether a combo is good.
 - Card data was read from the official gallery and a fan database and may contain mistakes. Please open an issue.
-- Not affiliated with Neuroscape, LLC. Card names and text belong to their owners.
+- Not affiliated with Neuroscape, LLC. Card images, names and text belong to Neuroscape, LLC.
