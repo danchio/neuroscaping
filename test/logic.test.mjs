@@ -189,3 +189,62 @@ test('AI rules brief carries the verified rules', () => {
   assert.match(RULES_BRIEF, /INITIALIZE/);
   assert.match(aiPrompt(emptyDeck('x')), /RAM deck/);
 });
+
+// ---- synergy graph ----
+import { deckGraph, viewGraph, partnersOf, layoutGraph, STRENGTHS, strengthMin, nodeRadius } from '../src/lib/graph.js';
+
+const bigDeck = () => {
+  let d = setMainframe(emptyDeck('Big'), card('Firestarter').id);
+  const pool = cards.filter((c) => c.type !== 'Mainframe' && (c.factions.includes('Hacker') || c.factions.includes('Mystic')));
+  for (const c of pool.slice(0, 50)) d = changeCount(d, 'main', c.id, 1 + (c.id % 3));
+  return d;
+};
+
+test('graph: edges are symmetric pairs with positive weight, and filter by strength', () => {
+  const g = deckGraph(bigDeck());
+  assert.equal(g.nodes.length, 50);
+  assert.ok(g.edges.length > 50);
+  assert.ok(g.edges.every((e) => e.a < e.b && e.weight > 0));
+  const all = viewGraph(g, strengthMin('all'));
+  const strong = viewGraph(g, strengthMin('strong'));
+  const named = viewGraph(g, strengthMin('named'));
+  assert.ok(all.edges.length > strong.edges.length && strong.edges.length >= named.edges.length);
+  assert.ok(strong.edges.length < 150, 'strong view stays readable for 50 cards');
+  assert.deepEqual(STRENGTHS.map((s) => s.min), [3, 2, 1]);
+});
+
+test('graph: ranking, loose cards and partners agree', () => {
+  const g = deckGraph(bigDeck());
+  const v = viewGraph(g, 2);
+  const w = (n) => v.deg.get(n.id).weight;
+  for (let i = 1; i < v.rank.length; i++) assert.ok(w(v.rank[i - 1]) >= w(v.rank[i]));
+  for (const o of v.orphans) assert.equal(v.deg.get(o.id).count, 0);
+  const top = v.rank[0];
+  const partners = partnersOf(g, top.id, 2);
+  assert.equal(partners.length, v.deg.get(top.id).count);
+  assert.ok(partners.every((p) => p.why.length > 0 && p.weight >= 2));
+});
+
+test('graph: a card with no links to the others is loose', () => {
+  const pool = cards.filter((c) => c.type !== 'Mainframe');
+  let pair = null;
+  outer: for (const a of pool) for (const b of pool) if (a.id < b.id && !deckGraph({ main: { [a.id]: 1, [b.id]: 1 } }).edges.length) { pair = [a, b]; break outer; }
+  assert.ok(pair, 'the set has unlinked pairs');
+  const g = deckGraph({ main: { [pair[0].id]: 1, [pair[1].id]: 1 } });
+  const v = viewGraph(g, 1);
+  assert.equal(v.orphans.length, 2);
+  assert.deepEqual(viewGraph(deckGraph(emptyDeck()), 1).rank, []);
+});
+
+test('graph layout: deterministic, nothing overlaps, clusters by primary faction', () => {
+  const g = deckGraph(bigDeck());
+  const v = viewGraph(g, 2);
+  const a = layoutGraph(g, v.deg), b = layoutGraph(g, v.deg);
+  assert.deepEqual([...a.pos.entries()], [...b.pos.entries()]);
+  const ps = [...a.pos.values()];
+  for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) assert.ok(Math.hypot(ps[i].x - ps[j].x, ps[i].y - ps[j].y) >= ps[i].r + ps[j].r, `nodes ${i} and ${j} overlap`);
+  assert.equal(a.clusters.map((c) => c.faction).sort().join(), [...new Set(g.nodes.map((n) => n.card.factions[0] || 'None'))].sort().join());
+  const [x, y, w, h] = a.viewBox;
+  for (const p of ps) assert.ok(p.x - p.r >= x && p.x + p.r <= x + w && p.y - p.r >= y && p.y + p.r <= y + h);
+  assert.ok(nodeRadius(4) > nodeRadius(1));
+});

@@ -50,7 +50,7 @@ function mountRoute(r) {
   const root = $('#view');
   root.className = `view-${r.name}`;
   switch (r.name) {
-    case 'deck': activate(r.id); reg.view = mountDeck(root, r.id); break;
+    case 'deck': activate(r.id); reg.view = mountDeck(root, r.id, r.tab); break;
     case 'mainframe': reg.view = mountMainframe(root, r.id); break;
     case 'mainframes': reg.view = mountMainframes(root); break;
     case 'cards': reg.view = mountCards(root); break;

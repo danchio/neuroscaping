@@ -13,6 +13,8 @@ import { attachCombo } from '../ui/combo.js';
 import { getDeck, setDeck, activate, change, moveCard, pickMainframe, setMainframeExact, duplicateDeck } from '../store.js';
 import { href, go } from '../router.js';
 import { reg } from './registry.js';
+import { mountSynergy } from './synergy.js';
+import { mountPlaytest } from './playtest.js';
 import { shareDialog, importDialog, mainframePicker, confirmDelete } from '../ui/dialogs.js';
 
 const view = { group: 'type', sort: 'ram', role: 'all', suggMax: 12 };
@@ -54,7 +56,7 @@ function rowHtml({ c, n }, zone, deck) {
   </li>`;
 }
 
-export function mountDeck(root, id) {
+export function mountDeck(root, id, tab = 'cards') {
   const d0 = getDeck(id);
   if (!d0) {
     root.innerHTML = '<div class="page"><div class="empty-block"><h3>Deck not found</h3><p>It may have been deleted, or it lives in another browser. Import a shared list to bring it here.</p><div class="row"><a class="btn primary" href="#/decks">Your decks</a><button class="btn" data-act="open-import">Import a list</button></div></div></div>';
@@ -63,12 +65,11 @@ export function mountDeck(root, id) {
   deckId = id;
   previewId = null;
   let booted = false;
-  root.innerHTML = `<div class="deck-page">
-    <header id="d-head" class="dhead"></header>
-    <section id="d-stats" class="strip" aria-label="Deck statistics"></section>
+  const tabsNav = `<nav class="dtabs" aria-label="Deck sections">${[['cards', 'Cards'], ['synergy', 'Synergy'], ['playtest', 'Playtest']].map(([t, l]) => `<a href="${href.deck(id, t)}"${t === tab ? ' aria-current="page"' : ''}>${l}</a>`).join('')}</nav>`;
+  const cardsTab = `<section id="d-stats" class="strip" aria-label="Deck statistics"></section>
     <div class="addbar">
       <label class="sr" for="add">Add a card by name</label>
-      <div class="add-field"><span class="add-ic">${plusIcon}</span><input id="add" type="text" autocomplete="off" spellcheck="false" placeholder="Add a card: a name, or “3 admin” + Enter">
+      <div class="add-field"><span class="add-ic">${plusIcon}</span><input id="add" type="text" autocomplete="off" spellcheck="false" placeholder="Add a card: a name, or \u201c3 admin\u201d + Enter">
       <ul id="add-list" class="combo" hidden></ul></div>
       <p class="hint">Press <kbd>/</kbd> to jump here. <kbd>Shift</kbd> + <kbd>Enter</kbd> adds to the sideboard. A mainframe name sets the mainframe.</p>
     </div>
@@ -81,16 +82,23 @@ export function mountDeck(root, id) {
         <div id="d-notes"></div>
       </div>
       <aside class="drail" aria-label="Preview and suggestions"><div id="d-preview" class="preview" aria-live="polite"></div><div id="d-sugg" class="sugg-pane"></div></aside>
-    </div></div>`;
-  $('#g-group').value = view.group; $('#g-sort').value = view.sort;
-  $('#g-group').addEventListener('change', (e) => { view.group = e.target.value; paintList(); });
-  $('#g-sort').addEventListener('change', (e) => { view.sort = e.target.value; paintList(); });
+    </div>`;
+  root.innerHTML = `<div class="deck-page tab-${tab}">
+    <header id="d-head" class="dhead"></header>
+    ${tabsNav}
+    ${tab === 'cards' ? cardsTab : '<div id="d-tab"></div>'}</div>`;
+  let sub = null;
+  if (tab === 'cards') {
+    $('#g-group').value = view.group; $('#g-sort').value = view.sort;
+    $('#g-group').addEventListener('change', (e) => { view.group = e.target.value; paintList(); });
+    $('#g-sort').addEventListener('change', (e) => { view.sort = e.target.value; paintList(); });
+  }
 
   const D = () => getDeck(deckId);
 
   // ---- add bar ----
   const input = $('#add');
-  attachCombo({
+  if (tab === 'cards') attachCombo({
     input, list: $('#add-list'),
     items: (v) => searchCards(parseQuick(v).query, { limit: 8 }),
     render: (c) => { const d = D(); const n = d ? copiesOf(d, c.id) : 0; return `${costBox(c)}<span class="cn">${esc(titleCase(c.name))}</span><span class="ct">${esc(c.type)}${c.subtype ? ' ' + esc(c.subtype) : ''}</span>${glyphRow(c, 13)}<span class="cs">${c.type === 'Mainframe' ? (d.mainframe === c.id ? 'Your mainframe' : 'Mainframe') : n ? `${n} in deck` : ''}</span>`; },
@@ -223,7 +231,9 @@ export function mountDeck(root, id) {
   }
 
   function paintAll() {
-    paintHead(); paintStats(); paintList(); paintSugg();
+    paintHead();
+    if (tab !== 'cards') { if (!sub) { sub = (tab === 'synergy' ? mountSynergy : mountPlaytest)($('#d-tab'), deckId); } else sub.refresh(); return; }
+    paintStats(); paintList(); paintSugg();
     if (!previewId) {
       const d = D();
       const mf = d.mainframe && byId.get(d.mainframe);
@@ -233,7 +243,7 @@ export function mountDeck(root, id) {
     }
   }
   paintAll();
-  return { refresh: () => { if (!getDeck(deckId)) { go(href.decks()); return; } keepFocus(paintAll); }, destroy() { deckId = null; } };
+  return { refresh: () => { if (!getDeck(deckId)) { go(href.decks()); return; } keepFocus(paintAll); }, destroy() { sub && sub.destroy(); deckId = null; } };
 }
 
 onAct('r-inc', (el) => { const r = change(deckId, el.dataset.zone, Number(el.dataset.id), 1); if (r.message) toast(r.message); });

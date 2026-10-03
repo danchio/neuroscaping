@@ -1,10 +1,19 @@
-// Hash routing: #/decks, #/deck/<id>, #/mainframes, #/mainframe/<id>, #/cards, #/card/<id>.
-export function parse(hash = location.hash) {
+// Hash routing: #/decks, #/deck/<id>[/synergy|/playtest], #/mainframes, #/mainframe/<id>, #/cards[?filters], #/card/<id>.
+export const DECK_TABS = ['cards', 'synergy', 'playtest'];
+
+/** Split "#/cards?fac=Hacker" into the path part and a URLSearchParams. */
+export function split(hash = location.hash) {
   const h = hash.replace(/^#\/?/, '');
-  const [name = '', id = ''] = h.split('/');
+  const i = h.indexOf('?');
+  return { path: i < 0 ? h : h.slice(0, i), query: new URLSearchParams(i < 0 ? '' : h.slice(i + 1)) };
+}
+
+export function parse(hash = location.hash) {
+  const { path } = split(hash);
+  const [name = '', id = '', tab = ''] = path.split('/');
   switch (name) {
     case '': case 'decks': return { name: 'decks' };
-    case 'deck': return id ? { name: 'deck', id } : { name: 'decks' };
+    case 'deck': return id ? { name: 'deck', id, tab: DECK_TABS.includes(tab) ? tab : 'cards' } : { name: 'decks' };
     case 'mainframes': return { name: 'mainframes' };
     case 'mainframe': return Number(id) ? { name: 'mainframe', id: Number(id) } : { name: 'mainframes' };
     case 'cards': return { name: 'cards' };
@@ -14,10 +23,10 @@ export function parse(hash = location.hash) {
 }
 export const href = {
   decks: () => '#/decks',
-  deck: (id) => `#/deck/${id}`,
+  deck: (id, tab = 'cards') => (tab === 'cards' ? `#/deck/${id}` : `#/deck/${id}/${tab}`),
   mainframes: () => '#/mainframes',
   mainframe: (id) => `#/mainframe/${id}`,
-  cards: () => '#/cards',
+  cards: (query = '') => `#/cards${query ? '?' + query : ''}`,
   card: (id) => `#/card/${id}`,
 };
 export const go = (h) => { if (location.hash === h) dispatchEvent(new HashChangeEvent('hashchange')); else location.hash = h; };
