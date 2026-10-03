@@ -121,3 +121,48 @@ test('ability costs are attached from card images', () => {
   assert.ok(card('Rubber Ducky').abilities[0].name === 'ACTIVATE');
   assert.match(aiPrompt({ ...emptyDeck('x'), main: { [adm.id]: 4 } }), /Upgrade \(cost 2 RAM \+ run\)/);
 });
+
+// ---- redesign: roles, suggestions, quick add ----
+import { sectionOf, suggestForMainframe, suggestForDeck, roleTags } from '../src/lib/roles.js';
+import { parseQuick, searchCards } from '../src/lib/search.js';
+
+test('quick-add syntax', () => {
+  assert.deepEqual(parseQuick('3 admin'), { qty: 3, query: 'admin' });
+  assert.deepEqual(parseQuick('2x Coder'), { qty: 2, query: 'Coder' });
+  assert.deepEqual(parseQuick('admin'), { qty: 1, query: 'admin' });
+});
+
+test('name search ranks exact and prefix first, tolerates typos in order', () => {
+  assert.equal(searchCards('admin')[0].name, 'ADMIN');
+  assert.ok(searchCards('cod').slice(0, 3).some((c) => c.name === 'CODER'));
+  assert.ok(searchCards('codr').some((c) => c.name === 'CODER'));
+  assert.deepEqual(searchCards(''), []);
+});
+
+test('every non-mainframe card lands in exactly one section; mainframes in none', () => {
+  for (const c of cards) {
+    if (c.type === 'Mainframe') assert.equal(sectionOf(c), null);
+    else assert.ok(sectionOf(c), c.name);
+  }
+  assert.ok(roleTags(card('Coder')).has('draw'));
+});
+
+test('mainframe suggestions are grouped, ranked and explain why', () => {
+  const mf = mainframes.find((m) => m.name === 'FIRESTARTER');
+  const s = suggestForMainframe(mf);
+  assert.ok(s.groups.length >= 4);
+  const ids = s.groups.flatMap((g) => g.items.map((i) => i.card.id));
+  assert.equal(new Set(ids).size, ids.length, 'a card appears once');
+  assert.ok(s.groups.every((g) => g.items.every((i) => i.why.length > 0)));
+  assert.ok(ids.includes(card('Admin').id));
+});
+
+test('deck suggestions skip maxed cards and credit tier progress', () => {
+  const mf = mainframes.find((m) => m.name === 'FIRESTARTER');
+  let d = setMainframe(emptyDeck(), mf.id);
+  for (let i = 0; i < 4; i++) d = changeCount(d, 'main', card('Admin').id, 1);
+  const s = suggestForDeck(d, 50);
+  assert.ok(!s.some((x) => x.card.name === 'ADMIN'), 'maxed card is not suggested');
+  assert.ok(s.length > 5 && s.every((x) => x.why.length));
+  assert.deepEqual(suggestForDeck(emptyDeck()), []);
+});
