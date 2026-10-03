@@ -107,3 +107,16 @@ Draft 1 had glowing faction borders on every tile, a green "legal" and red "ille
 - Mainframe meter is a segmented gauge (console-like) rather than a smooth progress bar.
 
 Motion: the segmented meter fills once on load of a deck or mainframe page, and the home hero traces draw once. Both are disabled by `prefers-reduced-motion`, as are scanlines.
+
+## Added in the second pass
+
+New components, all built from the same frame and banner:
+- **Deck tabs** (Cards / Synergy / Playtest): a quiet underline row, one active tab, shared deck header above.
+- **Synergy map**: one disc per faction, nodes sized by RAM cost and coloured by faction, edges only for links at or above the chosen strength (Strong by default, so a 50-card deck stays readable). The biggest cluster is the hub; others ring around it. Labels sit in a separate layer and are greedily decluttered; the selected card's label is always shown. Loose cards are a list beside the map, not a red alarm. Phones default to the list because a 390px map is too small to read.
+- **Tag chips**: a 3px colour stripe on a neutral chip. Tag colours are six muted hexes, deliberately not saturated, so faction colour stays the only loud colour and blue/red stay reserved for damage.
+- **Odds chart**: nine bars (opening hand plus eight turns), the big opening percentage on the left, cards seen under each bar. Bars use the signal colour only.
+- **Mini cards** for the sample hand: the same notched frame at tile size, with a Send back toggle in the footer.
+- **Phone deck strip**: legality, minimum count and the tier meter sit in one compact block before anything else; stats collapse into disclosure rows; list rows have 44px tap targets and the name opens the drawer.
+- **First-run Home**: three numbered steps (a real sequence, so numbering is justified) and one primary action.
+
+Assumptions shown in the UI rather than hidden: odds assume all draws come from the cyberdeck and the RAM deck is not modelled; synergy weights are heuristic; role labels come from regexes on rules text.

@@ -12,14 +12,18 @@ Static site, no build step, no dependencies. Open `index.html` through any stati
 - `src/lib/`: pure logic (deck rules, synergy, roles and suggestions, name search, share). Covered by `npm test`.
   - `roles.js`: role classification from rules text, `suggestForMainframe`, `suggestForDeck`.
   - `search.js`: fuzzy name search and the "3 admin" quick-add parser.
+  - `graph.js`: deck synergy graph (`deckGraph`, `viewGraph` strength filter, `partnersOf`, deterministic `layoutGraph`). Weights: name 3, tag 1.5, faction 1, subtype 1; strengths Named >=3, Strong >=2 (default), All >=1.
+  - `tags.js`: pure tag layer logic (`normalizeTags`, `mergeLayers`, `groupByTag`, `deckTagBoost`). `backup.js`: `buildBackup`/`parseBackup`/`mergeBackup` (never overwrites; same id with different content comes in as "(imported)").
+  - `odds.js`: hypergeometric odds, `cardsSeen`, sample hand (`newGame`, `mulligan`, `drawTurn`). Assumes every draw comes from the cyberdeck.
+  - `filters.js`: card-browser filters <-> URL query. `abilities.js`: ability cost wording (`costPhrase`).
 - `src/main.js`: boot, hash router, top bar. `src/router.js`: route parsing. `src/store.js`: decks in localStorage (`neuroscape-deck-lab:v1`, `{decks, activeId}`). `src/tagstore.js`: the tag layers (`neuroscape-deck-lab:tags:v1`, same shape as `data/my_tags.json`). Small prefs live in `neuroscape-deck-lab:prefs:v1`.
-- `src/views/`: one module per page (`home.js` also holds the mainframe list, `mainframe.js`, `deck.js`, `cards.js`, `detail.js` = card drawer). Each `mount*` returns `{refresh, destroy}`.
-- `src/ui/`: shared pieces (`card.js` notched card frame and chevron banner, `parts.js` mainframe meter and tiles, `glyphs.js` faction icons, `combo.js` combobox, `dialogs.js`, `dom.js`).
+- `src/views/`: one module per page (`home.js` also holds the mainframe list, `mainframe.js`, `deck.js` (Cards tab, hosts the other tabs), `synergy.js` (map and list), `playtest.js` (odds and sample hand), `cards.js`, `detail.js` = card drawer incl. tag editing). Each `mount*` returns `{refresh, destroy}`.
+- `src/ui/`: shared pieces (`card.js` notched card frame and chevron banner, `parts.js` mainframe meter and tiles, `glyphs.js` faction icons, `combo.js` combobox, `dialogs.js` (incl. My data: tags and backup), `tags.js` tag chips, `dom.js`).
 - `src/style.css`: all styling, dark only. Design rationale in `docs/design.md`; screenshots in `docs/screenshots/`.
 - `decks/*.txt`: saved deck lists in the app's text format. `node scripts/check-deck.mjs decks/<file>.txt` validates one.
 
 ## Routes (hash)
-`#/decks` (home), `#/deck/<id>`, `#/mainframes`, `#/mainframe/<id>`, `#/cards`, `#/card/<id>` (drawer over the previous page). Old share links `#d=<base64>` still open as a new deck.
+`#/decks` (home), `#/deck/<id>` (tabs: `#/deck/<id>/synergy`, `#/deck/<id>/playtest`), `#/mainframes`, `#/mainframe/<id>`, `#/cards` (filters live in the query, e.g. `#/cards?fac=Hacker&type=Program&my=ramp`; see `src/lib/filters.js`), `#/card/<id>` (drawer over the previous page). Old share links `#d=<base64>` still open as a new deck.
 
 ## Working on decks with the owner
 1. Read the deck file and the card text for every card in it (from `src/data/cards.js`).

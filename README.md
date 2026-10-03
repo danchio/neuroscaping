@@ -6,8 +6,12 @@ An unofficial, fan-made deck builder for the Neuroscape TCG (Genesis set). Brows
 Once GitHub Pages is on, the site is at `https://<your-user>.github.io/<repo>/`.
 
 - **Home**: your saved decks and the 20 mainframes. Start a deck from a mainframe or import a list.
-- **Mainframe pages**: what each mainframe wants, with suggestions grouped by role (characters, draw, RAM, removal, finishers, gear, tricks, engines). Each says why it fits. Suggestions come from card text, not play statistics.
+- **Mainframe pages**: what each mainframe wants, with suggestions grouped by role (characters, draw, RAM, removal, direct damage, disruption, finishers, gear, tricks, engines). Each says why it fits. Suggestions come from card text, not play statistics.
 - **Deck page**: dense list grouped by type, RAM or faction, quantity steppers, mainframe tier meter, RAM curve, faction mix, legality, sideboard, notes, and a type-to-add box (try "3 admin" then Enter; Shift+Enter adds to the sideboard). A suggestions panel offers one-click adds.
+- **Synergy tab** (deck page): a map of how the cards in the deck connect, grouped by faction. Pick Named only, Strong or All links; select a card to see its partners and why; loose cards are listed with cards that would fit better. List view is the default on phones.
+- **Playtest tab**: draw odds (chance of at least N cards of a kind by each turn, going first or second) and a sample hand with mulligan and next-turn draws. Odds assume every draw comes from the cyberdeck; the separate 25-card RAM deck is not modelled.
+- **Cards page links**: filters are kept in the address, so a filtered view can be bookmarked or shared.
+- **First visit**: Home explains three steps and offers an example deck.
 - **Ability costs** read like the rulebook: "Run 2 RAM and run this character" means two separate costs (run 2 RAM, and rotate the character).
 - **Cards**: filter by type, faction, RAM cost, subtype, tag and rarity or search rules text. Open a card to see what it works with and what asks for it.
 - **Your tags**: make your own tags ("ramp", "burst", "draw engine") from any card's details, filter the Cards page by them, show them on deck rows, group a deck by them, and let suggestions prefer cards that share a tag with your deck. Tags stay in your browser. **My data** (top right) manages tags and downloads or imports one backup file with all decks and tags; importing merges and never overwrites. To share tags with the playgroup, commit them to `data/my_tags.json` (same shape; ask your Claude to fill it in). Your own edits layer on top of that file.
