@@ -10,10 +10,11 @@ import { keepImages } from '../ui/cardimg.js';
 import { rulesPlain } from '../lib/cardimg.js';
 import { activeDeck, change, getPref, setPref } from '../store.js';
 import { href, parse, split } from '../router.js';
-import { blankFilters, encodeFilters, decodeFilters, hasQuery } from '../lib/filters.js';
-import { tagToggle } from '../ui/tags.js';
+import { blankFilters, encodeFilters, decodeFilters, hasQuery, matchesFilters, facetCounts, multiSummary, toggleIn, rangeSummary, hasRange, normalizeRange, activeChips, hasAnyFilter, activeGroupCount, SET_KEYS, TYPES } from '../lib/filters.js';
+import { fieldHtml, setHost, bindFilterPops, closePop, syncPop, isOpen, toggleField } from '../ui/filterpop.js';
+import { closeIcon } from '../ui/glyphs.js';
 import { effective } from '../tagstore.js';
-import { hasAnyTag, usage } from '../lib/tags.js';
+import { tagsOf, usage } from '../lib/tags.js';
 import { titleCase } from '../lib/cards.js';
 
 const blank = blankFilters;
@@ -27,38 +28,57 @@ export function presetFilter({ factions = [], types = [] } = {}) {
   types.forEach((t) => F.types.add(t));
 }
 
-const plainCache = new Map();
-const plain = (c) => {
-  if (!plainCache.has(c.id)) plainCache.set(c.id, `${c.name} ${c.type} ${c.subtype} ${c.factions.join(' ')} ${c.tags.join(' ')} ${c.keywords.join(' ')} ${(c.mainframe ? [c.mainframe.lead, ...c.mainframe.tiers.map((t) => t.text)] : c.text).join(' ')} ${(c.abilities || []).map((a) => a.name).join(' ')}`.replace(/[\[\]]/g, '').toLowerCase());
-  return plainCache.get(c.id);
-};
+const ctxFor = (deck) => ({
+  cardTags: (id) => tagsOf(effective(), id).map((t) => t.id),
+  inDeck: (c) => !!(deck && (copiesOf(deck, c.id) || deck.mainframe === c.id || deck.sideMainframe === c.id)),
+});
+const matches = (c, deck) => matchesFilters(c, F, ctxFor(deck));
 
-function matches(c, deck) {
-  if (F.types.size && !F.types.has(c.type)) return false;
-  if (F.factions.size && !c.factions.some((x) => F.factions.has(x))) return false;
-  if (F.subtypes.size && !F.subtypes.has(c.subtype)) return false;
-  if (F.tags.size && !c.tags.some((x) => F.tags.has(x))) return false;
-  if (F.mytags.size && !hasAnyTag(effective(), c.id, F.mytags)) return false;
-  if (F.rarity.size && !F.rarity.has(c.rarity)) return false;
-  if (F.ram.size && (c.ram == null || !F.ram.has(Math.min(c.ram, 8)))) return false;
-  if (F.iconic && !c.iconic) return false;
-  if (F.hasAbility && !c.abilities) return false;
-  if (F.inDeck && !(deck && (copiesOf(deck, c.id) || deck.mainframe === c.id || deck.sideMainframe === c.id))) return false;
-  if (F.q) { const hay = plain(c); if (!F.q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w))) return false; }
-  return true;
+// ---- the filter fields ----
+const MULTI = [
+  { key: 'types', label: 'Type', values: () => TYPES },
+  { key: 'factions', label: 'Faction', values: () => FACTIONS, fac: true },
+  { key: 'ram', label: 'RAM cost', range: true },
+  { key: 'subtypes', label: 'Subtype', values: () => SUBTYPES },
+  { key: 'tags', label: 'Tag', values: () => TAGS },
+  { key: 'rarity', label: 'Rarity', values: () => RARITIES },
+  { key: 'mytags', label: 'Your tags', mine: true },
+];
+const labelOf = (key, v) => (key === 'mytags' ? (effective().tags.find((t) => t.id === v) || { name: v }).name : v);
+
+/** What a popover shows right now (counts follow every other active filter). */
+function specFor(key) {
+  const deck = activeDeck(); const ctx = ctxFor(deck);
+  if (key === 'ram') {
+    return { type: 'range', label: 'RAM cost', min: F.ram.min, max: F.ram.max, note: 'Mainframes have no RAM cost, so a range hides them.' };
+  }
+  const def = MULTI.find((d) => d.key === key);
+  if (!def) return null;
+  const counts = facetCounts(cards, F, ctx, key);
+  if (def.mine) {
+    return { type: 'multi', label: def.label, manage: true, options: effective().tags.map((t) => ({ value: t.id, label: t.name, color: t.color || 'var(--dim)', stripe: true, on: F.mytags.has(t.id), count: counts.get(t.id) || 0, disabled: !(counts.get(t.id) > 0) })) };
+  }
+  return { type: 'multi', label: def.label, options: def.values().map((v) => ({ value: v, label: v, on: F[key].has(v), count: counts.get(v) || 0, disabled: !(counts.get(v) > 0), color: def.fac ? fvar(v) : null, glyph: def.fac ? `<span class="fo-g" style="color:${fvar(v)}">${glyph(v, 14)}</span>` : '' })) };
 }
 
-const group = (title, key, values, { fac = false, label = (v) => v } = {}) =>
-  `<fieldset class="fgroup"><legend>${title}</legend><div class="chips">${values.map((v) => {
-    const on = F[key].has(v);
-    return `<button class="chip${fac ? ' fac' : ''}" aria-pressed="${on}" data-act="chip" data-key="${key}" data-val="${esc(v)}" ${fac ? `style="--c:${fvar(v)}"` : ''}>${fac ? glyph(v, 13) : ''}${esc(label(v))}</button>`;
-  }).join('')}</div></fieldset>`;
+function fieldFor(def) {
+  if (def.range) return fieldHtml({ key: 'ram', label: def.label, summary: rangeSummary(F.ram), count: hasRange(F.ram) ? 1 : 0, type: 'range' });
+  const order = def.mine ? effective().tags.map((t) => t.id) : def.values();
+  const sel = F[def.key];
+  const summary = multiSummary(sel, order);
+  return fieldHtml({ key: def.key, label: def.label, summary: def.mine && sel.size ? multiSummary(new Set([...sel].map((id) => labelOf('mytags', id))), order.map((id) => labelOf('mytags', id))) : summary, count: sel.size });
+}
 
-function myTagGroup() {
-  const eff = effective();
-  const use = usage(eff);
-  if (!eff.tags.length) return `<fieldset class="fgroup"><legend>Your tags</legend><p class="dim small">Tag cards from their details to filter by them here.</p><button class="linkbtn small" data-act="open-mydata">Make tags</button></fieldset>`;
-  return `<fieldset class="fgroup"><legend>Your tags <button class="linkbtn small lg-link" data-act="open-mydata">Manage</button></legend><div class="chips">${eff.tags.map((t) => tagToggle(t, { act: 'chip', on: F.mytags.has(t.id), extra: ` data-key="mytags" title="${use.get(t.id) || 0} cards"` })).join('')}</div></fieldset>`;
+function chipsHtml() {
+  const list = activeChips(F, labelOf);
+  if (!list.length) return '';
+  const names = { types: 'Type', factions: 'Faction', subtypes: 'Subtype', tags: 'Tag', rarity: 'Rarity', mytags: 'Tag' };
+  return list.map((c) => {
+    const k = c.kind === 'set' ? names[c.key] : '';
+    const fac = c.key === 'factions' ? `<span style="color:${fvar(c.value)}">${glyph(c.value, 12)}</span>` : '';
+    const mine = c.key === 'mytags' ? (effective().tags.find((t) => t.id === c.value) || {}).color : '';
+    return `<button type="button" class="achip" data-act="chip-x" data-key="${c.key}" data-val="${esc(c.value ?? '')}" ${mine ? `style="--t:${mine}"` : ''} aria-label="Remove filter ${esc(k ? k + ' ' : '')}${esc(c.label)}">${fac}${k ? `<span class="ac-k">${k}</span>` : ''}<span>${esc(c.label)}</span>${closeIcon}</button>`;
+  }).join('') + '<button type="button" class="linkbtn small" data-act="c-reset">Clear all</button>';
 }
 
 const stepFor = (c, deck) => stepper(c, copiesOf(deck, c.id), { inc: 'b-inc', dec: 'b-dec', label: `Copies in ${deck.name} of` });
@@ -97,17 +117,23 @@ export function mountCards(root) {
   }
   const cview = getPref('cardsView', 'images') === 'list' ? 'list' : 'images';
   root.innerHTML = `<div class="cards-page">
-    <aside class="rail" aria-label="Filters"><div class="rail-in" id="c-rail"></div></aside>
+    <div class="rail-back" data-act="rail-close" aria-hidden="true"></div>
+    <aside class="rail" id="c-sheet" aria-label="Filters">
+      <div class="rail-head"><h2>Filters</h2><button type="button" class="rail-x" data-act="rail-close" aria-label="Close filters">${closeIcon}</button></div>
+      <div class="rail-in" id="c-rail"></div>
+      <div class="rail-foot"><button type="button" class="btn primary" data-act="rail-close" id="c-show">Show cards</button></div>
+    </aside>
     <section class="cards-main" aria-label="Cards">
       <div class="page-head tight"><h1>Cards</h1><p>Genesis set. Open any card to see what it works with.</p></div>
       <div class="cbar">
         <div class="search"><label class="sr" for="cq">Search card names and rules text</label><input id="cq" type="search" placeholder="Search names and rules text" autocomplete="off" value="${esc(F.q)}"></div>
  <div class="seg-ctl" role="group" aria-label="How to show cards"><button data-act="c-view" data-val="images" aria-pressed="${cview === 'images'}">Images</button><button data-act="c-view" data-val="list" aria-pressed="${cview === 'list'}">List</button></div>
-        <button class="btn rail-toggle" data-act="rail-toggle" aria-expanded="false" aria-controls="c-rail">Filters</button>
+        <button type="button" class="btn rail-toggle" id="c-fbtn" data-act="rail-toggle" aria-expanded="false" aria-controls="c-sheet" aria-haspopup="dialog">Filters<span class="ff-n" id="c-fbadge" hidden></span></button>
         <span class="sortwrap"><label class="sortlab" for="csort">Sort</label>
         <select id="csort"><option value="id">Set order</option><option value="name">Name</option><option value="ram">RAM cost</option><option value="fit">Best fit for your deck</option></select></span>
         <p id="c-count" class="count" role="status"></p>
       </div>
+      <div id="c-active" class="achips" role="group" aria-label="Active filters" hidden></div>
       <p id="c-deck" class="deckline"></p>
       <div id="c-grid"></div>
     </section></div>`;
@@ -128,13 +154,19 @@ export function mountCards(root) {
   }
   function paintRail() {
     for (const id of [...F.mytags]) if (!effective().tags.some((t) => t.id === id)) F.mytags.delete(id);
-    const active = F.q || F.types.size || F.factions.size || F.subtypes.size || F.tags.size || F.mytags.size || F.rarity.size || F.ram.size || F.iconic || F.hasAbility || F.inDeck;
-    $('#c-rail').innerHTML = (effective().tags.length ? myTagGroup() : '') + group('Type', 'types', ['Character', 'Program', 'Gear', 'Mainframe']) + group('Faction', 'factions', FACTIONS, { fac: true })
-      + group('RAM cost', 'ram', [0, 1, 2, 3, 4, 5, 6, 7, 8], { label: (v) => (v === 8 ? '8+' : String(v)) }) + group('Subtype', 'subtypes', SUBTYPES) + group('Tag', 'tags', TAGS) + (effective().tags.length ? '' : myTagGroup()) + group('Rarity', 'rarity', RARITIES)
-      + `<div class="toggles"><label><input type="checkbox" data-act="c-toggle" data-key="iconic" ${F.iconic ? 'checked' : ''}> Iconic only</label>
+    const mineOn = effective().tags.length > 0;
+    const defs = MULTI.filter((d) => d.key !== 'mytags' || mineOn);
+    $('#c-rail').innerHTML = `<div class="ffields">${defs.map(fieldFor).join('')}</div>
+      ${mineOn ? '' : `<p class="ff-hint">Your own tags: <button type="button" class="linkbtn" data-act="open-mydata">make some</button> from any card's details to filter by them.</p>`}
+      <div class="toggles"><label><input type="checkbox" data-act="c-toggle" data-key="iconic" ${F.iconic ? 'checked' : ''}> Iconic only</label>
          <label><input type="checkbox" data-act="c-toggle" data-key="hasAbility" ${F.hasAbility ? 'checked' : ''}> Has a RAM-cost ability</label>
-         <label><input type="checkbox" data-act="c-toggle" data-key="inDeck" ${F.inDeck ? 'checked' : ''}> Only cards in your deck</label></div>`
-      + (active ? '<button class="btn small" data-act="c-reset">Clear all filters</button>' : '');
+         <label><input type="checkbox" data-act="c-toggle" data-key="inDeck" ${F.inDeck ? 'checked' : ''}> Only cards in your deck</label></div>
+      ${hasAnyFilter(F) ? '<button type="button" class="linkbtn small" data-act="c-reset">Clear all filters</button>' : ''}`;
+    const n = activeGroupCount(F);
+    const badge = $('#c-fbadge'); badge.hidden = !n; badge.textContent = n;
+    $('#c-fbtn').setAttribute('aria-label', n ? `Filters, ${n} active` : 'Filters');
+    const act = $('#c-active'); const html = chipsHtml(); act.innerHTML = html; act.hidden = !html;
+    syncPop();
   }
   function paintGrid() { keepImages($('#c-grid'), paintGridNow); }
   function paintGridNow() {
@@ -145,6 +177,7 @@ export function mountCards(root) {
     else if (sort === 'fit') { const fit = new Map(suggestForDeck(deck || { main: {}, side: {} }, 999).map((s, i) => [s.card.id, i])); list.sort((a, b) => (fit.get(a.id) ?? 9999) - (fit.get(b.id) ?? 9999) || a.id - b.id); }
     writeHash();
     $('#c-count').textContent = `${list.length} ${list.length === 1 ? 'card' : 'cards'}`;
+    $('#c-show').textContent = `Show ${list.length} ${list.length === 1 ? 'card' : 'cards'}`;
     $('#c-deck').innerHTML = deck ? `Adding to <a href="${href.deck(deck.id)}">${esc(deck.name)}</a>` : 'You have no deck yet. <button class="linkbtn" data-act="new-deck">Start one</button> to add cards from here.';
     const mode = getPref('cardsView', 'images') === 'list' ? 'list' : 'images';
     $$('[data-act="c-view"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.val === mode)));
@@ -169,20 +202,43 @@ export function mountCards(root) {
       $('#cq').value = F.q; $('#csort').value = sort;
       paintRail(); paintGrid();
     },
-    destroy() {},
+    destroy() { closePop({ silent: true }); closeSheet(); setHost(null); },
   };
 }
 
+const FLAGS = ['iconic', 'hasAbility', 'inDeck'];
+let repaint = () => {};
+function closeSheet() { railOpen = false; document.body.classList.remove('sheet-open'); const pg = $('.cards-page'); if (pg) pg.classList.remove('rail-open'); const b = $('#c-fbtn'); if (b) b.setAttribute('aria-expanded', 'false'); }
+
 export function bindActions(getView) {
-  onAct('chip', (el) => {
-    const key = el.dataset.key; const raw = el.dataset.val; const val = key === 'ram' ? Number(raw) : raw;
-    F[key].has(val) ? F[key].delete(val) : F[key].add(val);
-    keepFocus(() => getView()?.repaintAll());
+  repaint = () => getView()?.repaintAll();
+  bindFilterPops();
+  setHost({
+    spec: specFor,
+    toggle: (key, v) => { toggleIn(F[key], v); repaint(); },
+    clear: (key) => { if (key === 'ram') F.ram = { min: null, max: null }; else F[key].clear(); repaint(); },
+    range: (key, r) => { F.ram = normalizeRange(r); repaint(); },
   });
-  document.addEventListener('change', (e) => { if (e.target.dataset?.act === 'c-toggle') { F[e.target.dataset.key] = e.target.checked; keepFocus(() => getView()?.repaintAll()); } });
-  onAct('c-reset', () => { F = blank(); const i = $('#cq'); if (i) i.value = ''; getView()?.repaintAll(); });
-  onAct('c-view', (el) => { setPref('cardsView', el.dataset.val); getView()?.repaintAll(); });
-  onAct('rail-toggle', (el) => { railOpen = !railOpen; el.setAttribute('aria-expanded', String(railOpen)); $('.cards-page').classList.toggle('rail-open', railOpen); });
+  onAct('ff', (el) => toggleField(el.dataset.key));
+  onAct('chip-x', (el) => {
+    const { key, val } = el.dataset;
+    if (SET_KEYS.includes(key)) F[key].delete(val); else if (key === 'ram') F.ram = { min: null, max: null }; else if (FLAGS.includes(key)) F[key] = false;
+    // chips are removed from the row, so keep focus in the row (or on the grid when it empties)
+    const chips = $$('#c-active .achip'); const i = chips.indexOf(el);
+    repaint();
+    const left = $$('#c-active .achip');
+    (left[Math.min(i, left.length - 1)] || $('#cq'))?.focus({ preventScroll: true });
+  });
+  document.addEventListener('change', (e) => { if (e.target.dataset?.act === 'c-toggle') { F[e.target.dataset.key] = e.target.checked; keepFocus(() => repaint()); } });
+  onAct('c-reset', () => { F = blank(); const i = $('#cq'); if (i) i.value = ''; closePop({ silent: true }); repaint(); });
+  onAct('c-view', (el) => { setPref('cardsView', el.dataset.val); repaint(); });
+  onAct('rail-toggle', (el) => {
+    railOpen = !railOpen; el.setAttribute('aria-expanded', String(railOpen));
+    $('.cards-page').classList.toggle('rail-open', railOpen); document.body.classList.toggle('sheet-open', railOpen);
+    if (railOpen) setTimeout(() => $('#c-rail .ffield')?.focus({ preventScroll: true }), 30);
+  });
+  onAct('rail-close', () => { const was = railOpen; closePop({ silent: true }); closeSheet(); if (was) $('#c-fbtn')?.focus({ preventScroll: true }); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && railOpen && !isOpen()) { e.preventDefault(); const f = $('#c-fbtn'); closeSheet(); f?.focus(); } });
   onAct('b-inc', (el) => { const d = activeDeck(); if (!d) return; const r = change(d.id, 'main', Number(el.dataset.id), 1); if (r.message) toast(r.message); });
   onAct('b-dec', (el) => { const d = activeDeck(); if (d) change(d.id, 'main', Number(el.dataset.id), -1); });
 }
