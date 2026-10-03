@@ -1,4 +1,4 @@
-# Deck Lab: design plan
+# Neuroscaping: design plan
 
 ## Concept
 
@@ -40,7 +40,7 @@ The **notched frame with chevron banner**. Frames have the top-left and bottom-r
 
 ### Home
 ```
- [mark Deck Lab]  Decks  Mainframes  Cards      [ search cards  / ]   [deck chip]
+ [mark Neuroscaping]  Decks  Mainframes  Cards      [ search cards  / ]   [deck chip]
  ┌ hero: circuit traces, boots in once ────────────────────────────────────┐
  │  Build the deck.                      [ New deck ]  [ Import a list ]    │
  │  Pick a mainframe, add the cards it wants, share the list.               │

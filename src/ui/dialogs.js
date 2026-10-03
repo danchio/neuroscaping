@@ -124,7 +124,7 @@ onAct('tag-del', (el) => { if (deleteTag(el.dataset.val)) { toast('Tag deleted')
 onAct('backup-download', () => {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(buildBackup(state.decks, localTags()), null, 2)], { type: 'application/json' }));
-  a.download = `deck-lab-backup-${dayStamp()}.json`;
+  a.download = `neuroscaping-backup-${dayStamp()}.json`;
   a.click(); URL.revokeObjectURL(a.href);
   toast('Backup downloaded');
 });

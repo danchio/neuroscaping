@@ -353,7 +353,7 @@ test('backup: round trip, never overwrites, merges tags by name', () => {
 
 test('backup: rejects files that are not ours', () => {
   assert.throws(() => parseBackup('{oops'), /valid JSON/);
-  assert.throws(() => parseBackup('{"decks":[]}'), /Deck Lab backup/);
+  assert.throws(() => parseBackup('{"decks":[]}'), /Neuroscaping backup/);
   const ok = parseBackup(JSON.stringify({ app: 'neuroscape-deck-lab', decks: [{ id: 'z', name: 'Z', main: { 99999: 2, [card('Admin').id]: 2 }, side: {} }, { nope: 1 }] }));
   assert.equal(ok.decks.length, 1);
   assert.deepEqual(ok.decks[0].main, { [card('Admin').id]: 2 });

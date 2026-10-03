@@ -1,4 +1,4 @@
-# Neuroscape Deck Lab
+# Neuroscaping
 
 An unofficial, fan-made deck builder for the Neuroscape TCG (Genesis set). Browse every card, see which cards work together, build decks with legality checks, and share them with your playgroup. It runs in the browser: no accounts, no install, no AI needed.
 

@@ -1,4 +1,4 @@
-// Deck Lab: boot, routing and the top bar. Views live in src/views, parts in src/ui.
+// Neuroscaping: boot, routing and the top bar. Views live in src/views, parts in src/ui.
 import { byId, titleCase } from './lib/cards.js';
 import { decodeShare } from './lib/share.js';
 import { searchCards } from './lib/search.js';
@@ -86,7 +86,7 @@ function route() {
   document.title = pageTitle(r);
 }
 function pageTitle(r) {
-  const base = 'Neuroscape Deck Lab';
+  const base = 'Neuroscaping';
   if (r.name === 'deck') { const d = state.decks.find((x) => x.id === r.id); return d ? `${d.name} | ${base}` : base; }
   if (r.name === 'mainframe') { const m = byId.get(r.id); return m ? `${titleCase(m.name)} | ${base}` : base; }
   return { mainframes: `Mainframes | ${base}`, cards: `Cards | ${base}` }[r.name] || base;

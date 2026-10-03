@@ -1,4 +1,4 @@
-# Neuroscape Deck Lab: notes for Claude
+# Neuroscaping: notes for Claude
 
 Static site, no build step, no dependencies. Open `index.html` through any static server (`node scripts/serve.mjs`).
 

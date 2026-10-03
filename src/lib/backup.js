@@ -20,7 +20,7 @@ function cleanDeck(d) {
 export function parseBackup(text) {
   let raw;
   try { raw = JSON.parse(text); } catch { throw new Error('That file is not valid JSON.'); }
-  if (!raw || raw.app !== BACKUP_APP || !Array.isArray(raw.decks)) throw new Error('That does not look like a Deck Lab backup.');
+  if (!raw || raw.app !== BACKUP_APP || !Array.isArray(raw.decks)) throw new Error('That does not look like a Neuroscaping backup.');
   return { decks: raw.decks.map(cleanDeck).filter(Boolean), tags: normalizeTags(raw.tags, { lenient: true }) };
 }
 
