@@ -465,3 +465,23 @@ test('sample hands: opening hand, mulligan to the bottom, turn draws', () => {
   for (let i = 0; i < 5; i++) g = drawTurn(g);
   assert.equal(g.hand.length, 6); assert.equal(g.library.length, 0);
 });
+
+test('roles: removal is not over-broad; discard and can\'t-block are disruption', () => {
+  const sec = (n) => sectionOf(card(n));
+  for (const n of ['Delete', 'Terminate', 'Solar Flare', 'Static Blast', 'Fatal Error 75', 'Death Metal', 'Short Circuit']) assert.equal(sec(n), 'removal', n);
+  for (const n of ['Overload Mk. I', 'Power Spike', 'Memory Leak', 'System Error', 'The Pulse']) assert.equal(sec(n), 'damage', n);
+  for (const n of ['Phishing', 'Lug Nut', 'EMP Grenade', 'Garbage Day', 'The High Priestess']) assert.equal(sec(n), 'disruption', n);
+  assert.equal(sec('Download More RAM'), 'ram');
+  assert.notEqual(sec('Sneakerhead'), 'removal', 'preventing damage is not removal');
+  assert.notEqual(sec('Justice'), 'removal');
+  const removal = cards.filter((c) => sectionOf(c) === 'removal');
+  assert.ok(removal.length > 20 && removal.length < 45, `removal has ${removal.length} cards`);
+  assert.ok(removal.every((c) => !/\bdiscard\b|can't block/i.test(c.text.join(' ')) || /destroy/i.test(c.text.join(' '))), 'no pure discard or can\'t-block card in removal');
+});
+
+test('mainframe suggestions split removal, damage and disruption', () => {
+  const s = suggestForMainframe(mainframes.find((m) => m.name === 'FIRESTARTER'));
+  const titles = s.groups.map((g) => g.title);
+  for (const t of ['Removal', 'Direct damage', 'Disruption']) assert.ok(titles.includes(t), t);
+  assert.ok(!titles.includes('Removal and damage'));
+});

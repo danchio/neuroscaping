@@ -9,9 +9,13 @@ const strip = (s) => s.replace(/\([^)]*\)/g, ' '); // reminder text in brackets 
 
 const TESTS = {
   draw: /\bdraw (\d+|X|a|that many)\b|\bINDEX\b|search your cyberdeck|into your hand|put .* from your (recycle bin|cache) into your hand/i,
-  ram: /install (\d+|X|that many)? ?RAM|RAM (comes|come) into play|refresh(ed)? (all )?(of )?(your )?RAM|destroy .* RAM you control/i,
-  removal: /\b(destroy|purge|bin|discard|exile)\b[^.]*\b(target|each|all)\b|\bdiscard\b|can't block|can't attack/i,
-  damage: /deal (\d+|X|that much|double)[^.]*damage/i,
+  ram: /install (\d+|X|that many)? ?RAM|RAM (comes|come) into play|refresh(ed)? (all )?(of )?(your )?RAM|destroy .* RAM you control|into your RAM bank/i,
+  // Clears the opponent's board: destroys characters, programs, gear and the like, or damages characters.
+  removal: /\bdestroy (target|all|each|up to|attacking|blocking)[^.]*\b(characters?|programs?|gear|cyberware|weapons?|tether|environments?|datashard|trojan)\b|\bdamage to (?:(?:another|all|each|every|any|up to \d+|target|other|\d+)\s+)+characters?\b/i,
+  // Hits a mainframe or bioframe directly.
+  damage: /\bdeals? (\d+|X|that much|double)[^.]*damage to (any target|target player|target opponent|each opponent|each player|all players|them|him|her|this player|that player|the defending player|that character's controller)/i,
+  // Makes the opponent's turn worse without clearing anything: discard, can't block, RAM and recycle bin attacks.
+  disruption: /\bdiscard\b|\bcounter target\b|can't (block|attack)|\bdestroy (target|all|each)[^.]*\bRAM\b|\bpurge (target|all|each)[^.]*recycle bins?/i,
   protect: /\bprevent\b|immune|\bARMOR\b|\bCLOAKED\b|\bMIRAGE\b/i,
 };
 
@@ -28,14 +32,16 @@ export const SECTIONS = [
   { id: 'characters', title: 'Top characters', hint: 'Bodies that count toward faction synergy and fit the plan.' },
   { id: 'draw', title: 'Draw and search', hint: 'Cards that find more cards.' },
   { id: 'ram', title: 'RAM and ramp', hint: 'Cards that install or refresh RAM.' },
-  { id: 'removal', title: 'Removal and damage', hint: 'Ways to clear blockers and hit the mainframe or bioframe.' },
+  { id: 'removal', title: 'Removal', hint: 'Destroys or damages characters, programs and gear.' },
+  { id: 'damage', title: 'Direct damage', hint: 'Hits the mainframe or bioframe without needing an attack to connect.' },
+  { id: 'disruption', title: 'Disruption', hint: 'Discard, cards that stop blocking or attacking, and attacks on RAM or recycle bins.' },
   { id: 'finisher', title: 'Finishers', hint: 'Expensive or explosive cards that end games.' },
   { id: 'gear', title: 'Gear', hint: 'Cyberware, weapons and tethers.' },
   { id: 'tricks', title: 'Tricks', hint: 'Swift programs and one-shot scripts, drugs and tarot.' },
   { id: 'engines', title: 'Engines', hint: 'Protocols, environments and datashards that stay in play.' },
 ];
 
-const CLAIM_ORDER = ['draw', 'ram', 'finisher', 'removal', 'gear', 'engines', 'tricks', 'characters'];
+const CLAIM_ORDER = ['draw', 'ram', 'finisher', 'removal', 'damage', 'disruption', 'gear', 'engines', 'tricks', 'characters'];
 
 export function sectionOf(c) {
   if (c.type === 'Mainframe') return null;
@@ -46,7 +52,7 @@ export function sectionOf(c) {
       case 'draw': if (r.has('draw')) return id; break;
       case 'ram': if (r.has('ram')) return id; break;
       case 'finisher': if (r.has('finisher')) return id; break;
-      case 'removal': if (r.has('removal') || r.has('damage')) return id; break;
+      case 'removal': case 'damage': case 'disruption': if (r.has(id)) return id; break;
       case 'gear': if (c.type === 'Gear') return id; break;
       case 'engines': if (c.type === 'Program' && isPersistent(c)) return id; break;
       case 'tricks': if (c.type === 'Program') return id; break;
