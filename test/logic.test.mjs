@@ -366,3 +366,102 @@ test('Copy for AI includes your tags when given', () => {
   assert.match(aiPrompt(d, eff), /My tags: Ramp\./);
   assert.doesNotMatch(aiPrompt(d), /My tags/);
 });
+
+// ---- draw odds and sample hands ----
+import { hypergeomPmf, atLeast, cardsSeen, oddsByTurn, matchGroup, groupSize, groupOptions, shuffle, buildLibrary, newGame, mulligan, drawTurn, turnDraws } from '../src/lib/odds.js';
+
+// independent exact check with BigInt binomials
+const C = (n, k) => { if (k < 0 || k > n) return 0n; let r = 1n; for (let i = 1n; i <= BigInt(k); i++) r = (r * (BigInt(n) - BigInt(k) + i)) / i; return r; };
+const exactAtLeast = (N, K, n, k) => { let num = 0n; for (let i = k; i <= Math.min(K, n); i++) num += C(K, i) * C(N - K, n - i); return Number(num * 1000000n / C(N, n)) / 1e6; };
+const seeded = (seed = 1) => () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+
+test('odds: hypergeometric matches exact counting', () => {
+  for (const [N, K, n, k] of [[50, 4, 5, 1], [50, 4, 5, 2], [60, 12, 8, 2], [255, 4, 20, 1], [40, 1, 7, 1], [50, 25, 5, 3]]) {
+    assert.ok(Math.abs(atLeast(N, K, n, k) - exactAtLeast(N, K, n, k)) < 2e-6, `${N},${K},${n},${k}`);
+  }
+  assert.ok(Math.abs(atLeast(50, 4, 5, 1) - (1 - 1370754 / 2118760)) < 1e-9, 'classic: 4 copies in 50, opening 5');
+  let sum = 0; for (let k = 0; k <= 5; k++) sum += hypergeomPmf(50, 4, 5, k);
+  assert.ok(Math.abs(sum - 1) < 1e-12);
+});
+
+test('odds: edge cases', () => {
+  assert.equal(atLeast(50, 0, 5, 1), 0, 'no copies');
+  assert.equal(atLeast(50, 4, 5, 0), 1, 'at least zero');
+  assert.equal(atLeast(50, 4, 5, 6), 0, 'cannot draw more than you see');
+  assert.equal(atLeast(50, 4, 3, 4), 0);
+  assert.equal(atLeast(10, 4, 10, 4), 1, 'seeing the whole deck');
+  assert.ok(Math.abs(atLeast(50, 49, 5, 4) - 1) < 1e-9, 'only one non-hit exists, so 5 cards hold at least 4 hits');
+  assert.equal(hypergeomPmf(50, 4, 5, 9), 0);
+  assert.equal(atLeast(50, 60, 5, 1), 0, 'invalid K');
+});
+
+test('odds: cards seen by turn follow the draw rules', () => {
+  assert.deepEqual([0, 1, 2, 3].map((t) => cardsSeen(t, true)), [5, 6, 8, 10], 'going first draws 1 on turn 1');
+  assert.deepEqual([0, 1, 2, 3].map((t) => cardsSeen(t, false)), [5, 7, 9, 11]);
+  assert.equal(cardsSeen(40, true, 50), 50, 'capped at the deck');
+  const rows = oddsByTurn({ N: 50, K: 4, k: 1, first: true, turns: 8 });
+  assert.equal(rows.length, 9);
+  assert.ok(rows.every((r, i) => i === 0 || r.p >= rows[i - 1].p), 'odds never fall as you draw');
+  assert.equal(rows[0].seen, 5);
+  assert.ok(oddsByTurn({ N: 50, K: 4, k: 1, first: false })[1].p > rows[1].p, 'going second sees more cards');
+  assert.ok(oddsByTurn({ N: 50, K: 4, k: 2 })[0].p < oddsByTurn({ N: 50, K: 4, k: 1 })[0].p);
+});
+
+test('odds: groups by card, faction, type, tag and RAM cost', () => {
+  const A = card('Admin'), Co = card('Coder');
+  const eff = normalizeTags({ tags: [{ id: 'ramp', name: 'Ramp' }], cards: { [A.id]: ['ramp'] } });
+  const d = changeCount(changeCount(emptyDeck(), 'main', A.id, 3), 'main', Co.id, 2);
+  assert.equal(groupSize(d, { kind: 'card', value: A.id }, eff), 3);
+  assert.equal(groupSize(d, { kind: 'faction', value: 'Hacker' }, eff), 5);
+  assert.equal(groupSize(d, { kind: 'type', value: 'Character' }, eff), 5);
+  assert.equal(groupSize(d, { kind: 'tag', value: 'ramp' }, eff), 3);
+  assert.equal(groupSize(d, { kind: 'ram', value: 1 }, eff), 5);
+  assert.equal(groupSize(d, { kind: 'ram', value: 8 }, eff), 0);
+  assert.ok(matchGroup(cards.find((c) => c.ram >= 8) || A, { kind: 'ram', value: 8 }) === (cards.some((c) => c.ram >= 8)));
+  const o = groupOptions(d, eff);
+  assert.deepEqual(o.card.map((x) => x.label), ['ADMIN', 'CODER']);
+  assert.deepEqual(o.tag.map((x) => x.label), ['Ramp']);
+  assert.ok(o.faction.length === 1 && o.faction[0].count === 5 && o.ram.length === 1);
+});
+
+test('sample hands: shuffle is a permutation, deterministic with a seed', () => {
+  const d = changeCount(changeCount(emptyDeck(), 'main', card('Admin').id, 4), 'main', card('Coder').id, 4);
+  const lib = buildLibrary(d);
+  assert.equal(lib.length, 8);
+  assert.equal(new Set(lib.map((c) => c.uid)).size, 8);
+  const a = shuffle(lib, seeded(7)), b = shuffle(lib, seeded(7));
+  assert.deepEqual(a, b);
+  assert.deepEqual([...a].sort((x, y) => x.uid - y.uid), lib);
+});
+
+test('sample hands: opening hand, mulligan to the bottom, turn draws', () => {
+  let d = emptyDeck();
+  for (const c of cards.filter((x) => x.type !== 'Mainframe').slice(0, 30)) d = changeCount(d, 'main', c.id, 2);
+  const g0 = newGame(d, { first: true, rng: seeded(3) });
+  assert.equal(g0.hand.length, 5);
+  assert.equal(g0.library.length, 55);
+  const all = (g) => [...g.hand, ...g.library].map((c) => c.uid).sort((x, y) => x - y);
+  // mulligan two cards
+  const send = [g0.hand[0].uid, g0.hand[1].uid];
+  const next = g0.library.slice(0, 2).map((c) => c.uid);
+  const g1 = mulligan(g0, send);
+  assert.equal(g1.hand.length, 5);
+  assert.deepEqual(g1.hand.slice(3).map((c) => c.uid), next, 'redraws from the top');
+  assert.deepEqual(g1.library.slice(-2).map((c) => c.uid), send, 'sent cards sit on the bottom');
+  assert.deepEqual(all(g1), all(g0), 'no card is lost or duplicated');
+  assert.equal(mulligan(g0, []), g0);
+  // going first: 1 card on turn 1, then 2
+  assert.equal(turnDraws(g0), 1);
+  const t1 = drawTurn(g0);
+  assert.equal(t1.hand.length, 6); assert.equal(t1.turn, 1);
+  const t2 = drawTurn(t1);
+  assert.equal(t2.hand.length, 8);
+  assert.equal(mulligan(t1, [t1.hand[0].uid]), t1, 'no mulligan after turn 1 starts');
+  const second = newGame(d, { first: false, rng: seeded(3) });
+  assert.equal(drawTurn(second).hand.length, 7, 'going second takes 2 on turn 1');
+  assert.equal(drawTurn(second, 0).hand.length, 5, 'taking both installs from the RAM deck draws none');
+  // running the library dry never breaks
+  let g = newGame({ ...emptyDeck(), main: { [card('Admin').id]: 6 } }, { rng: seeded(1) });
+  for (let i = 0; i < 5; i++) g = drawTurn(g);
+  assert.equal(g.hand.length, 6); assert.equal(g.library.length, 0);
+});

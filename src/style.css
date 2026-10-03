@@ -237,7 +237,7 @@ a.ref.cardref:hover { text-decoration-color: var(--signal); }
 .cf.tile .cf-rules { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; flex: 0 1 auto; margin-bottom: auto; }
 .cf.tile .cf-rules p { display: inline; }
 .cf.tile .cf-rules p + p::before { content: ' '; }
-.cf.tile .cf-abs, .cf.tile .tile-foot, .cf.tile .sg-foot { position: relative; z-index: 2; }
+.cf.tile .cf-abs, .cf.tile .tile-foot, .cf.tile .sg-foot, .cf.tile .h-foot { position: relative; z-index: 2; }
 .cf.full { --cut: 18px; }
 .cf.full .cf-in { padding: 18px 18px 16px; gap: 11px; }
 .cf.full .cf-name { font-size: 28px; }
@@ -609,6 +609,51 @@ a.ref.cardref:hover { text-decoration-color: var(--signal); }
 .bk-prev { margin-top: 12px; padding: 12px 14px; background: var(--plate); border-left: 3px solid var(--signal); }
 .dlg code { font-size: 12.5px; padding: 1px 5px; background: var(--substrate); border: 1px solid var(--trace); }
 .dlg-lead + .row.left { margin-top: -4px; }
+
+
+/* ---------- playtest ---------- */
+.ptest { display: flex; flex-direction: column; gap: 8px; }
+.pt-sec .sec-head { margin-top: 8px; }
+.pt-sec + .pt-sec .sec-head { margin-top: 32px; }
+.o-ctl { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-bottom: 14px; }
+.o-f { display: flex; flex-direction: column; gap: 4px; color: var(--dim); font-size: 12.5px; }
+.o-f.grow { flex: 1 1 220px; max-width: 360px; }
+.o-f select { height: 34px; }
+.o-ctl .seg-ctl button { height: 34px; }
+.o-ctl .stp b { min-width: 30px; }
+.o-out { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 22px; margin-bottom: 12px; }
+.o-big { display: flex; align-items: baseline; gap: 12px; }
+.o-big b { font: 700 56px/1 var(--display); }
+.o-big span { color: var(--dim); font-size: 15px; }
+.o-sum { color: var(--dim); }
+.odds { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 8px; max-width: 880px; padding: 14px 16px 10px; background: var(--chassis); border: 1px solid var(--trace); }
+.oc { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.oc-bar { display: flex; align-items: flex-end; width: 100%; height: 140px; border-bottom: 1px solid var(--trace-hi); }
+.oc-bar i { position: relative; display: block; width: 100%; }
+.oc-bar i::before { content: ''; position: absolute; inset: 0; background: var(--signal); opacity: .55; clip-path: polygon(0 4px, 4px 0, 100% 0, 100% 100%, 0 100%); }
+.oc.open .oc-bar i::before { opacity: 1; }
+.oc-p { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); padding-bottom: 3px; font: 700 16px/1 var(--display); font-style: normal; white-space: nowrap; }
+.oc-l { font: 600 14px var(--display); color: var(--signal); }
+.oc-s { color: var(--faint); font-size: 11.5px; }
+.h-ctl { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.h-took { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--dim); font-size: 13px; margin-bottom: 8px; }
+.h-took .seg-ctl button { height: 30px; min-width: 38px; padding: 0 10px; }
+.h-status { color: var(--dim); margin: 6px 0 14px; max-width: 80ch; }
+.h-status b { color: var(--signal); font-weight: 600; }
+.hand { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.cf.mini { --cut: 12px; }
+.cf.mini .cf-in { padding: 10px 10px 10px; gap: 6px; }
+.cf.mini .cf-name { font-size: 18px; }
+.cf.mini .cost { width: 24px; height: 24px; font-size: 16px; }
+.cf.mini .cf-rules { font-size: 12.5px; -webkit-line-clamp: 5; }
+.cf.mini .cf-foot { display: none; }
+.cf.mini .banner { height: 20px; font-size: 12.5px; }
+.h-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 28px; }
+.h-new { padding: 1px 7px; background: var(--signal); color: var(--ink); font-weight: 700; font-size: 12px; }
+.h-foot .btn[aria-pressed=true] { background: var(--signal); color: var(--ink); border-color: var(--signal); }
+.cell.marked { opacity: .55; }
+.cell.marked .cf { filter: grayscale(.6); }
+.cf.mini .tile-foot { padding-top: 6px; }
 
 /* ---------- drawer and dialogs ---------- */
 dialog { color: var(--signal); padding: 0; border: 1px solid var(--trace-hi); background: var(--chassis); }
