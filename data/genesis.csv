@@ -1,0 +1,256 @@
+﻿ID,Name,Type,Subtype,Faction 1,Faction 2,Tags,Frame,RAM Cost,ATK,DEF,Rarity,Copy Limit,Iconic,Keywords Mentioned,References (factions / tags / cards),Damage Type Referenced,Rules Text
+1,"HEX, CODEMANCER",Character,,Hacker,,,Mainframe,4,2,4,Quantum Rare,4,Yes,,Hacker,Mainframe,"On your turn, the first [Hacker] program or trojan you play costs 3 RAM less. // Deal X [Mainframe] damage to target player, where X is double your [Hacker] synergy."
+2,ADMIN,Character,,Hacker,,,Mainframe,1,1,1,Common,4,,,,,Install 1 RAM running.
+3,CODER,Character,,Hacker,,,Mainframe,1,1,1,Common,4,,INDEX,Hacker,,"INDEX 3 [Hacker] PROGRAM (Reveal the top 3 cards of your cyberdeck. Put 1 [Hacker] program into your hand, then bin the rest.)"
+4,SCRIPT KIDDIE,Character,,Hacker,,,Mainframe,2,1,1,Uncommon,4,,,Hacker,,"Choose an activated ability of target [Hacker] character. That ability and its cost replace CTRL+C. (If that ability contains a non-bracketed character name, replace it with Script Kiddie.)"
+5,DEEP DIVER,Character,,Hacker,,,Mainframe,2,1,1,Uncommon,4,,,Hacker,,"Until turn end, you may play target [Hacker] script in your recycle bin. As it resolves, purge it."
+6,DIGITAL SPECTRE,Character,,Hacker,,,Mainframe,2,1,1,Common,4,,STEALTH,,Mainframe,"When Digital Spectre’s attack hits a player, it also deals 2 [Mainframe] damage to that player. // Digital Spectre gets STEALTH until turn end. (Character can’t be blocked.)"
+7,BLACK HAT,Character,,Hacker,,,Mainframe,3,2,3,Uncommon,4,,"CORRUPTION, NETCHECK",,Mainframe,"Put 1 CORRUPTION counter on target opponent's mainframe. (On NETCHECK, the active player takes 1 [Mainframe] damage from each CORRUPTION counter on their mainframe.)"
+8,PHANTOM OS,Character,,Hacker,,A.I.,Mainframe,2,1,1,Common,4,,,,,"Search your cyberdeck for a virus or trojan and reveal it. Put it into your hand, then shuffle. Purge Phantom OS."
+9,ANIMA PROXY,Character,,Hacker,,,Mainframe,3,2,3,Uncommon,4,,,,Mainframe,Deal 1 [Mainframe] damage to target player for each program attached to their mainframe.
+10,TAGGER,Character,,Hacker,,Anarchist,,2,1,1,Common,4,,,Hacker,,Put a +1/+1 counter on another target [Hacker] character.
+11,SERIAL KILLER,Character,,Hacker,,,Mainframe,3,3,1,Uncommon,4,,,,,Move target action on the cache to the top of the cache.
+12,THE PRODIGY,Character,,Hacker,,,Mainframe,2,1,2,Rare,4,,,Hacker,Mainframe,"Deal X [Mainframe] damage to target player, where X is your [Hacker] synergy."
+13,"NOVA, THE WHITE RABBIT",Character,,Hacker,Wonderland,,Mainframe,3,2,3,Rare,4,,,"Hacker, Wonderland",,"Draw 1. // Search your cyberdeck for a [Hacker] or [Wonderland] card and reveal it. Put it into your hand, then shuffle. Purge Nova, the White Rabbit."
+14,BLUE SCREEN OF DEATH,Program,Script,Hacker,,,,5,,,Uncommon,4,,"SWIFT, UNSTABLE",,,"SWIFT Target player’s mainframe becomes UNSTABLE. (They roll a d20 for each character and program they control. If they roll 10 or below, destroy that character or program.)"
+15,OVERLOAD MK. I,Program,Script,Hacker,,,,1,,,Common,4,,SWIFT,,Mainframe,SWIFT Deal 2 [Mainframe] damage to any target.
+16,OVERLOAD MK. II,Program,Script,Hacker,,,,3,,,Common,4,,SWIFT,,Mainframe,SWIFT Deal 4 [Mainframe] damage to any target.
+17,SYSTEM ERROR,Program,Virus,Hacker,,,,4,,,Rare,4,,NETCHECK,,Mainframe,"Attach to target player's mainframe. On their NETCHECK, System Error deals 2 [Mainframe] damage to them."
+18,QUANTUM ENCRYPTION,Program,Script,Hacker,,,,3,,,Uncommon,4,,SWIFT,,,SWIFT Prevent all damage until turn end.
+19,THE NET,Program,Environment,Hacker,,,,4,,,Quantum Rare,4,,,,,"When a player plays a program, they draw 1."
+20,THE GRID,Program,Environment,Hacker,,,,2,,,Common,4,,"INDEX, NETCHECK",,,"On NETCHECK, the active player may INDEX 3 PROGRAM. (Reveal the top 3 cards of your cyberdeck. Put 1 program into your hand, then bin the rest.)"
+21,HACKATHON,Program,Script,Hacker,,,,2,,,Common,4,,SWIFT,Hacker,,SWIFT Reboot the abilities of all [Hacker] characters you control.
+22,PHISHING,Program,Script,Hacker,,,,2,,,Common,4,,SWIFT,,,SWIFT Target player reveals their hand and you choose a card from it. They discard that card.
+23,BINARY BLAST,Program,Drug,Hacker,,,,1,,,Common,4,,SWIFT,Hacker,,"SWIFT Refresh target character. If that character is a [Hacker], put a +1/+1 counter on it."
+24,HYPERCLOCK,Program,Script,Hacker,,,,1,,,Rare,4,,ADDITIONAL COST,,Both,"ADDITIONAL COST [Pay 3 [Mainframe] and 3 [Bioframe] health.] // Install 3 RAM refreshed. On turn end, destroy 3 RAM you control."
+25,FIREWALL,Program,Protocol,Hacker,,,,2,,,Uncommon,4,,,,Mainframe,"If a source would deal [Mainframe] damage to you, prevent that damage and put 1 breach counter on Firewall. // Whenever you put a breach counter on Firewall, if it has 2 or more, purge it."
+26,STATIC BLAST,Program,Script,Hacker,,,,2,,,Common,4,,,,Mainframe,Deal 1 [Mainframe] damage to each character target player controls.
+27,CORTEX CRAB,Gear,Cyberware,Hacker,,,,3,,,Uncommon,4,,MALICIOUS,,Mainframe,"MALICIOUS (Attach to any target character.) // When Cortex Crab becomes attached to a character an opponent controls, refresh that character and reboot its abilities. // You control attached character and its attack type is [Mainframe]. On turn end, destroy Cortex Crab."
+28,FATAL ERROR 75,Program,Trojan,Hacker,,,,2,,,Rare,4,,TROJAN,,,"TROJAN (Attach face down on target player's mainframe. You may flip and pay its ability cost to activate on any swift check after the turn it was played, then bin it.) // Destroy attacking characters controlled by this player."
+29,RUBBER DUCKY,Program,Trojan,Hacker,,,,2,,,Uncommon,4,,TROJAN,,,"TROJAN (Attach face down on target player's mainframe. You may flip and pay its ability cost to activate on any swift check after the turn it was played, then bin it.) // Copy target script on the cache controlled by an opponent."
+30,MEMORY LEAK,Program,Trojan,Hacker,,,,2,,,Common,4,,TROJAN,,Mainframe,"TROJAN (Attach face down on target player's mainframe. You may flip and pay its ability cost to activate on any swift check after the turn it was played, then bin it.) // If all of this player's RAM is running or committed, deal 4 [Mainframe] damage to them."
+31,POWER SPIKE,Program,Trojan,Hacker,,,,2,,,Uncommon,4,,TROJAN,,Mainframe,"TROJAN (Attach face down on target player's mainframe. You may flip and pay its ability cost to activate on any swift check after the turn it was played, then bin it.) // Deal 3 [Mainframe] damage to this player for each of their attacking characters."
+32,REDIRECT,Program,Trojan,Hacker,,,,2,,,Uncommon,4,,TROJAN,,,"TROJAN (Attach face down on target player's mainframe. You may flip and pay its ability cost to activate on any swift check after the turn it was played, then bin it.) // Change the target(s) of target activated ability on the cache."
+33,SCRAPPER,Character,,Cybernetic,,,Bioframe,1,1,1,Common,4,,,,,Install 1 RAM running.
+34,DUMPSTER DIVER,Character,,Cybernetic,,,Bioframe,1,1,1,Common,4,,,,,Put target gear from your recycle bin into your hand.
+35,LUG NUT,Character,,Cybernetic,,Animal,Bioframe,1,1,2,Uncommon,4,,,,,Target character with 3 or less defense can't block this turn.
+36,VIRTUAL KID,Character,,Cybernetic,,,Bioframe,1,1,2,Common,4,,,,,
+37,BLACKOUT BOYS,Character,,Cybernetic,,,Bioframe,2,1,2,Common,4,,,Blackout Boys,,Blackout Boys gets +1/+0 for each other [Blackout Boys] you control.
+38,CRYOBLADE ASSASSIN,Character,,Cybernetic,,,Bioframe,2,2,2,Uncommon,4,,"STEALTH, VISION",,,Cryoblade Assassin gets STEALTH until turn end. (Character can’t be blocked except by characters with VISION.)
+39,THE PLUG,Character,,Cybernetic,,,Bioframe,2,1,1,Common,4,,,,,"Search your cyberdeck for a drug and reveal it. Put it into your hand, then shuffle."
+40,IRON MAIDEN,Character,,Cybernetic,Thrasher,,Bioframe,3,2,4,Uncommon,4,,,,,"Until turn end, Iron Maiden gets +2/+0 and, whenever her attack hits a character, she may also deal that much damage to another target character."
+41,ROGUE VALKYRIE,Character,,Cybernetic,,Mech,Bioframe,4,3,5,Rare,4,,,,Bioframe,Deal 2 [Bioframe] damage to target character.
+42,"BOONYEN, WARDRIVER",Character,,Cybernetic,,Animal,Bioframe,6,7,8,Rare,4,,OVERRUN,,,OVERRUN (Character deals excess damage to defending player when blocked.)
+43,BACK ALLEY BRUISERS,Character,,Cybernetic,,,Bioframe,4,5,4,Common,4,,DUEL,,,DUEL target character. (Both characters' attacks hit each other.)
+44,FACELESS ONI,Character,,Cybernetic,,,Bioframe,4,4,3,Uncommon,4,,DUEL,,Bioframe,"DUEL target character. (Both characters' attacks hit each other.) If Faceless Oni destroys that character, deal 3 [Bioframe] damage to that character's controller."
+45,LASERSAW BERSERKER,Character,,Cybernetic,,,Bioframe,4,5,2,Rare,4,,OVERRUN,Cybernetic,,"OVERRUN (Character deals excess damage to defending player when blocked.) // Until turn end, Lasersaw Berserker gets +2/+0 for each [Cybernetic] you control. On turn end, destroy him."
+46,METAL HEAD,Character,,Cybernetic,Thrasher,,Bioframe,5,6,7,Quantum Rare,4,Yes,"DUEL, STAMINA",,,STAMINA (Character doesn’t run when it attacks.) // DUEL target character. (Both characters' attacks hit each other.) You may then gain control of target gear attached to them and attach it to Metal Head.
+47,"ARC, CIRCUIT BREAKER",Character,,Cybernetic,,,Bioframe,5,6,5,Quantum Rare,4,Yes,OVERRUN,Cybernetic,Mainframe,"Deal 1 [Mainframe] damage to characters opponents control. // Until turn end, [Cybernetic] characters you control get OVERRUN and +2/+0 for each cyberware attached to them."
+48,EXTERMINATOR,Character,,Cybernetic,,,Bioframe,3,1,1,Common,4,,,Exterminator,Bioframe,Deal 1 [Bioframe] damage to all characters except [Exterminator].
+49,STIM PACK,Program,Drug,Cybernetic,,,,1,,,Common,4,,"SWIFT, STAMINA",,,"SWIFT Until turn end, target character gets +1/+1 and STAMINA. (Character doesn’t run when it attacks.)"
+50,TIME,Program,Drug,,,Raver,,3,,,Rare,4,,,,,Refresh target character and reboot their abilities.
+51,CLARITEX,Program,Drug,Cybernetic,,,,1,,,Common,4,,"SWIFT, PSYCHOSIS, SYSTEM CHECK",,,SWIFT Target character is immune to PSYCHOSIS until your next SYSTEM CHECK.
+52,"MEGAROIDS, KIWI KRUSH",Program,Drug,Cybernetic,,,,2,,,Uncommon,4,,PSYCHOSIS,Cybernetic,,"Until turn end, target character you control gets +4/+4 and +5 PSYCHOSIS. If that character is non-[Cybernetic], it gets an additional +5 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.)"
+53,REDLINE,Program,Drug,Cybernetic,,,,2,,,Rare,4,,PSYCHOSIS,Cybernetic,,"Until turn end, target character you control gets +7/-1 and +8 PSYCHOSIS. If that character is non-[Cybernetic], it gets an additional +5 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.)"
+54,FLUX CANNON,Gear,Cyberware,Cybernetic,,,,2,,,Common,4,,PSYCHOSIS,,,"Attached character gets +2/+0 and +5 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.) // Whenever its attack hits a character, it may also deal that much damage to another target character."
+55,SPINAL SPLITTER,Gear,Cyberware,Cybernetic,,,,3,,,Quantum Rare,4,,PSYCHOSIS,,,"When attached character attacks, create 2 non-iconic token copies of it that are attacking and running. This character and its copies get +10 PSYCHOSIS, then all make PSYCHOSIS checks for their attacks. On turn end, purge all token copies created this way."
+56,RAILGUN,Gear,Weapon,Cybernetic,,,,3,,,Uncommon,4,,,,,Attached character gets +5/+0.
+57,RIOT BLADE,Gear,Cyberware,Cybernetic,,,,1,,,Common,4,,,,Bioframe,Deal 1 [Bioframe] damage to any target.
+58,DRIVE SAW,Gear,Cyberware,Cybernetic,,,,1,,,Uncommon,4,,PSYCHOSIS,Cybernetic,,"Attached character gets +2/+0 for each [Cybernetic] you control and +10 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.)"
+59,KNUX,Gear,Cyberware,Cybernetic,,,,2,,,Uncommon,4,,"DUEL, PSYCHOSIS",,,"Attached character gets +4/+0 and +5 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.) // DUEL target character. (Both characters’ attacks hit each other.)"
+60,SNATCHER,Gear,Cyberware,Cybernetic,,,,3,,,Uncommon,4,,PSYCHOSIS,,,"Attached character gets +5 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.) // When its attack hits a player, destroy target RAM they control and install 1 RAM running."
+61,CLOAKING FIELD,Gear,Cyberware,Cybernetic,,,,2,,,Uncommon,4,,CLOAKED,,,Attached character gets CLOAKED. (Character can't be targeted.)
+62,CODEBREAKER,Gear,Cyberware,Cybernetic,,,,1,,,Uncommon,4,,PSYCHOSIS,,,"Attached character gets +5 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.) // Destroy target program."
+63,BLACK MARKET,Program,Environment,Cybernetic,,,,2,,,Uncommon,4,,"INDEX, NETCHECK",,,"On NETCHECK, the active player may INDEX 3 GEAR. (Reveal the top 3 cards of your cyberdeck. Put 1 gear into your hand, then bin the rest.)"
+64,MAX GAINZ,Program,Environment,Cybernetic,,,,2,,,Common,4,,STAMINA,,,All characters get STAMINA. (Character doesn’t run when it attacks.)
+65,UNPAID INTERN,Character,,Corpo,,,Bioframe,0,0,1,Common,4,,,,,
+66,EXECUTIVE,Character,,Corpo,,,Bioframe,1,1,1,Common,4,,,,,Install 1 RAM running.
+67,TRUSTFUND BABY,Character,,Corpo,,,Bioframe,2,1,1,Common,4,,,,,"On enter, install 1 RAM running."
+68,SEEKER DRONES,Character,,Corpo,,Robot,Bioframe,1,1,1,Common,4,,,,Bioframe,"Destroy Seeker Drones. If you do, deal 2 [Bioframe] damage to any target."
+69,ARMS DEALER,Character,,Corpo,,,Bioframe,1,1,1,Common,4,,INDEX,,,"INDEX 3 GEAR (Reveal the top 3 cards of your cyberdeck. Put 1 gear into your hand, then bin the rest.)"
+70,ACPD DRONES,Character,,Corpo,,Robot,Bioframe,3,3,2,Common,4,,,,,Run target character.
+71,RIOT POLICE,Character,,Corpo,,,Bioframe,2,1,5,Common,4,,,Riot Police,,"Search your cyberdeck for [Riot Police] and reveal it. Put it into your hand, then shuffle."
+72,BOARDROOM SHARK,Character,,Corpo,,,Bioframe,3,2,2,Uncommon,4,,,,,Destroy target character that has taken damage this turn.
+73,YES MAN,Character,,Corpo,,,Bioframe,2,1,2,Uncommon,4,,,,,Counter target program that targets an action on the cache. Put a -1/-1 counter on Yes Man.
+74,VENTURE CAPITALIST,Character,,Corpo,,,Bioframe,4,1,2,Rare,4,,NETCHECK,,,"Venture Capitalist enters play with 1 interest counter on her. On your NETCHECK, double the number of interest counters on her. // Remove all interest counters from Venture Capitalist and install 1 RAM running for each interest counter removed."
+75,GOKUDO SILENCER,Character,,Corpo,,,Bioframe,3,4,3,Rare,4,,"BLEED, NETCHECK",,,"Destroy target tether. // Put a BLEED counter on target character. (On NETCHECK, each character controlled by the active player gets a -1/-1 counter for each BLEED counter on it.)"
+76,DEBT COLLECTOR,Character,,Corpo,,,Bioframe,2,2,1,Uncommon,4,,,,Bioframe,"When the last refreshed RAM an opponent controls is run or committed, Debt Collector deals 2 [Bioframe] damage to them."
+77,"ED, CARD COUNTER",Character,,Corpo,,Gambler,Bioframe,2,2,2,Rare,4,Yes,,,,"Whenever you roll a d20, put a +1/+1 counter on Ed, Card Counter."
+78,NEOSEC FIRESTORM,Character,,Corpo,,Mech,Bioframe,6,6,7,Rare,4,,,,Bioframe,Deal 1 [Bioframe] damage to up to 3 target characters. // Deal 3 [Bioframe] damage to target player.
+79,OMNIS DEATHBRINGER,Character,,Corpo,,,Bioframe,5,3,7,Rare,4,,,,Bioframe,Deal 4 [Bioframe] damage to target player.
+80,MAXIMILLION GOLD,Character,,Corpo,,,Bioframe,5,3,4,Quantum Rare,4,Yes,ADDITIONAL COST,,Bioframe,Install 2 RAM running. // ADDITIONAL COST [Destroy X RAM in your RAM bank.] Deal X [Bioframe] damage to target player.
+81,DOWNLOAD MORE RAM,Program,Script,Corpo,,,,3,,,Uncommon,4,,SWIFT,,,SWIFT Put up to 4 target RAM from your recycle bin into your RAM bank running.
+82,GENERATIONAL WEALTH,Program,Protocol,Corpo,,,,2,,,Common,4,,NETCHECK,,,"On your NETCHECK, roll a d20. If you roll 9 or higher, install 1 RAM running."
+83,MARKET MANIPULATION,Program,Script,Corpo,,,,4,,,Quantum Rare,4,,,Corpo,,"Install X RAM running, where X is your [Corpo] synergy."
+84,GENOCIDE,Program,Script,Corpo,,,,5,,,Uncommon,4,,,,Both,"Name a faction. Destroy all characters of that faction, then you lose 1 [Mainframe] and 1 [Bioframe] health for each character destroyed this way."
+85,TAX EVASION,Program,Protocol,Corpo,,,,3,,,Uncommon,4,,,,,"If a character you control is destroyed by an opponent, its committed RAM returns to its owner's RAM bank refreshed."
+86,ARTIFICIAL INFLATION,Program,Protocol,Corpo,,,,6,,,Uncommon,4,,,Corpo,,The RAM cost of non-[Corpo] cards is increased by 1 RAM. (This includes committed character costs.)
+87,BAILOUT,Program,Script,Corpo,,,,2,,,Uncommon,4,,SWIFT,,Both,"SWIFT If you would lose the game this turn, instead set your [Mainframe] and [Bioframe] health to 1 and destroy half of your RAM, rounded down."
+88,INSURANCE POLICY,Program,Protocol,Corpo,,,,3,,,Common,4,,,Corpo,,"Whenever a [Corpo] character you control is destroyed by an opponent, install 1 RAM running."
+89,PROPAGANDA,Program,Script,Corpo,,Politician,,4,,,Uncommon,4,,SWIFT,,,SWIFT Change target(s) of target program.
+90,OIL SPILL,Program,Script,Corpo,,,,5,,,Rare,4,,,,,Put a -1/-1 counter on all characters. // Install 2 RAM running.
+91,A-Z GLASS,Gear,Cyberware,Corpo,,,,2,,,Common,4,,,,,"On enter, draw 1. // You may look at any facedown cards in play."
+92,A-Z OPTICS,Gear,Cyberware,Corpo,,,,2,,,Uncommon,4,,"STEALTH, VISION, CLOAKED",,,Attached character gets VISION. (Character can block characters with STEALTH.) // All characters opponents control lose and can't get CLOAKED.
+93,SNEAKERHEAD,Gear,Cyberware,Corpo,,,,3,,,Uncommon,4,,SWIFT,,,"SWIFT On enter, prevent all damage to attached character until turn end. // Attached character gets +0/+2."
+94,CHRONOS MAESTRO,Gear,Cyberware,Corpo,,,,4,,,Uncommon,4,,,,,Install 2 RAM running.
+95,YACHT PARTY,Program,Environment,Corpo,,,,3,,,Common,4,,NETCHECK,Corpo,,"On NETCHECK, the active player may pay 2 RAM to reveal cards from their cyberdeck until they reveal a [Corpo] character. They put it into their hand and shuffle the rest into their cyberdeck."
+96,BOARDROOM,Program,Environment,Corpo,,,,4,,,Uncommon,4,,NETCHECK,Corpo,,"On NETCHECK, the player with the most characters in play may install 1 RAM running. If tied, nothing happens. // Each [Corpo] character counts as two for this ability."
+97,SCAVENGER,Character,,Dustrunner,,,Mainframe,1,1,1,Common,4,,,,,Install 1 RAM running.
+98,CARTOGRAPHER,Character,,Dustrunner,,,Mainframe,1,1,1,Common,4,,INDEX,,,"INDEX 3 ENVIRONMENT (Reveal the top 3 cards of your cyberdeck. Put 1 environment into your hand, then bin the rest.)"
+99,CANYON STALKERS,Character,,Dustrunner,,Animal,Bioframe,1,1,1,Common,4,,,,,"If Canyon Stalkers' attack hits a character with a counter on it, it deals double damage to that character. // Put a mark counter on target character."
+100,SAND SCORPION,Character,,Dustrunner,,,Mainframe,2,2,1,Uncommon,4,,,,Mainframe,Sand Scorpion deals [Mainframe] damage equal to its attack value to target running character.
+101,SEARCHER OF THE SKY,Character,,Dustrunner,Mystic,,Mainframe,2,1,1,Uncommon,4,,DIVINE,,,"DIVINE 2 (Look at the top 2 cards of your cyberdeck. Put 1 into your hand, then bin the other.)"
+102,BADLANDS SNIPER,Character,,Dustrunner,,,Bioframe,2,0,2,Common,4,,,,Bioframe,Put a mark counter on target character. // Deal 5 [Bioframe] damage to target character with a mark counter.
+103,COYOTE RAIDERS,Character,,Dustrunner,,,Mainframe,2,1,1,Common,4,,,,,"Until turn end, when Coyote Raiders' attack hits a player, destroy target RAM they control."
+104,BADLANDS MARAUDER,Character,,Dustrunner,,,Mainframe,3,3,2,Uncommon,4,,,,,"Until turn end, when Badlands Marauder's attack hits a player, destroy target RAM they control, then you install 1 RAM running."
+105,DUST DEVIL VULTURES,Character,,Dustrunner,,,Mainframe,3,4,2,Uncommon,4,,MIRAGE,,,"MIRAGE (When character is targeted by an opponent, you may put it into its owner’s hand.)"
+106,DUST DEVIL ELITES,Character,,Dustrunner,,,Mainframe,4,7,3,Rare,4,,,,,Target character with 3 or less defense can't block until turn end.
+107,ECLIPSE DROPSHIP,Character,,Dustrunner,,,Mainframe,3,0,3,Uncommon,4,,MIRAGE,Dustrunner,,"MIRAGE (When character is targeted by an opponent, you may put it into its owner’s hand.) // Put 1 [Dustrunner] character from your hand into play and set its RAM cost to 0. On turn end, if this character is in play, put it into its owner's hand."
+108,"ASHARA, HIGH PRIESTESS",Character,,Dustrunner,,,Mainframe,4,3,4,Quantum Rare,4,Yes,,Dustrunner,,"If you would draw 1 or more cards outside of your initialize stage, instead draw that many cards plus 1. // Until turn end, if the ability of a [Dustrunner] environment would trigger, it triggers an additional time."
+109,AEKANI PRIESTESS,Character,,Dustrunner,Mystic,,Mainframe,3,1,2,Uncommon,4,,,The Amrita,Both,"Gain 3 [Mainframe] or 3 [Bioframe] health. If [The Amrita] is the active environment, instead gain 5 [Mainframe] or 5 [Bioframe] health."
+110,BADLANDS INFANTRY,Character,,Dustrunner,,,Mainframe,1,1,1,Common,4,,,,,Badlands Infantry gets +1/+1 for each other character in their tether chain.
+111,DUST DEVIL INITIATE,Character,,Dustrunner,,,Mainframe,2,2,2,Common,4,,,,,
+112,PRIEST OF MAHKAV,Character,,Dustrunner,,,Mainframe,3,1,1,Uncommon,4,,ADDITIONAL COST,Dustrunner,,ADDITIONAL COST [Destroy another character you control.] All [Dustrunner] characters you control get +3/+3 until turn end.
+113,DUST TO DUST,Program,Script,Dustrunner,,,,5,,,Rare,4,,,,,Destroy target RAM and target character.
+114,SAVAGE DUSTSTORM,Program,Script,Dustrunner,,,,3,,,Rare,4,,,Dustrunner,,Run all non-[Dustrunner] characters.
+115,GROWING UNREST,Program,Virus,Dustrunner,,,,3,,,Uncommon,4,,,,Mainframe,"Attach to target player’s mainframe. Whenever they install a RAM, Growing Unrest deals 1 [Mainframe] damage to them."
+116,COMB THE DESERT,Program,Script,Dustrunner,,,,2,,,Common,4,,ADDITIONAL COST,Dustrunner,,ADDITIONAL COST [Run X [Dustrunner] characters you control.] // Draw X.
+117,MOON FLOWER CACTUS,Program,Drug,Dustrunner,,,,2,,,Uncommon,4,,,,,Draw 2.
+118,MIRAGE,Program,Script,Dustrunner,,,,1,,,Uncommon,4,,SWIFT,Dustrunner,,SWIFT Put target [Dustrunner] character you control into its owner's hand.
+119,EMP GRENADE,Program,Script,Dustrunner,,,,2,,,Common,4,,SWIFT,,,SWIFT Destroy target RAM.
+120,ENHANCE,Program,Script,Dustrunner,,,,1,,,Common,4,,SWIFT,,,"SWIFT Look at the top 5 cards of target opponent's cyberdeck, then put them back in any order."
+121,AEKANI BLOODLETTER,Gear,Weapon,Dustrunner,,,,1,,,Uncommon,4,,"BLEED, NETCHECK",,,"Whenever attached character's attack hits a character, put 2 BLEED counters on the character that was hit. (On NETCHECK, each character controlled by the active player gets a -1/-1 counter for each BLEED counter on it.)"
+122,DUST DEVIL GLAIVE,Gear,Weapon,Dustrunner,,,,3,,,Rare,4,,,,,"Attached character gets +2/+0. If this character is a Dust Devil, it gets an additional +4/+0."
+123,THE AMRITA,Program,Environment,Dustrunner,,,,3,,,Uncommon,4,,NETCHECK,Dustrunner,Both,"On NETCHECK, the active player gains 1 [Mainframe] and 1 [Bioframe] health for each [Dustrunner] character they control."
+124,THE PULSE,Program,Environment,Dustrunner,,,,4,,,Quantum Rare,4,,,Dustrunner,Mainframe,"Whenever a [Dustrunner] character attacks, deal 1 [Mainframe] damage to the defending player."
+125,SYNCHRONIZE,Gear,Tether,Dustrunner,,,,1,,,Uncommon,4,,TETHER,,,"TETHER (Attach to 2 target characters. If either character leaves play, the tether follows.) // The highest base attack value of any character in this tether chain becomes the attack value of all characters in this tether chain. The same is true for defense values."
+126,CHAIN AMPLIFIER,Gear,Tether,Dustrunner,,,,1,,,Common,4,,TETHER,,,"TETHER (Attach to 2 target characters. If either character leaves play, the tether follows.) // All characters in this tether chain get +1/+1."
+127,HOT WIRE,Gear,Tether,Dustrunner,,,,2,,,Uncommon,4,,"OVERRUN, TETHER",,,"TETHER (Attach to 2 target characters. If either character leaves play, the tether follows.) // All characters in this tether chain get OVERRUN. (Character deals excess damage to defending player when blocked.)"
+128,PSYCHIC,Character,,Mystic,,,Mainframe,1,1,1,Common,4,,,,,Install 1 RAM running.
+129,SEER,Character,,Mystic,,,Mainframe,2,0,2,Common,4,,DIVINE,,,"DIVINE 2 (Look at the top 2 cards of your cyberdeck. Put 1 into your hand, then bin the other.)"
+130,CELESTIAL CHANNELER,Character,,Mystic,,,Mainframe,1,1,1,Uncommon,4,,DATAVAMP,,Mainframe,"DATAVAMP (When character’s attack hits a player for [Mainframe] damage, you gain that much [Mainframe] health.) // When you play a tarot, Celestial Channeler gets +1/+1 until turn end."
+131,ASTRAL PROJECTOR,Character,,Mystic,,,Mainframe,3,2,2,Common,4,,STEALTH,,,"When you play a tarot, Astral Projector gets +1/+1 until turn end. // Astral Projector gets STEALTH until turn end. (Character can’t be blocked.)"
+132,SPIRIT GUIDE,Character,,Mystic,,,Mainframe,3,1,2,Uncommon,4,,,,Mainframe,"When you play a tarot, create a [Mainframe] 0/1 Dreamwalker token character."
+133,REANIMATOR,Character,,Mystic,,,Mainframe,3,1,2,Uncommon,4,,SPIRIT,Mystic,,"Put target [Mystic] character from your recycle bin into play with a SPIRIT counter. On turn end, purge it. (Character’s RAM cost is set to 0. If they would leave play, purge them instead.)"
+134,"ASTRA, COSMIC KITTY",Character,,Mystic,,Animal,Mainframe,2,1,1,Uncommon,4,,,,,"On enter, draw 1."
+135,THE ORACLE,Character,,Mystic,,,Mainframe,4,2,3,Rare,4,Yes,DIVINE,,,"You may look at the top card of your cyberdeck at any time. You may play that card. // DIVINE 3 (Look at the top 3 cards of your cyberdeck. Put 1 into your hand, then bin the rest.)"
+136,SEANCE SISTERS,Character,,Mystic,,,Mainframe,3,1,1,Uncommon,4,,,Mystic,,Seance Sisters get +1/+1 for each other [Mystic] you control.
+137,"TRIXIE, TECHNO QUEEN",Character,,Mystic,,Raver,Mainframe,3,1,1,Rare,4,Yes,,,,"When you play a tarot, draw 1. // The next drug you play this turn costs 0 RAM."
+138,MIND DELVER,Character,,Mystic,,,Mainframe,4,1,1,Uncommon,4,,,,,Take control of target character an opponent controls until turn end. Refresh it and reboot its abilities.
+139,"LUNA, THE SACRED MOON",Character,,Mystic,,,Mainframe,6,3,6,Quantum Rare,4,Yes,,"Lilith, the Dark Moon",Both,"You may play tarots reversed. // You gain 1 [Mainframe] and 1 [Bioframe] health for each tarot in your recycle bin. If you also control [Lilith, the Dark Moon], double this effect."
+140,"LILITH, THE DARK MOON",Character,,Mystic,,,Mainframe,6,6,3,Quantum Rare,4,Yes,,"Luna, the Sacred Moon",Mainframe,"You may play tarots reversed. // Deal 1 [Mainframe] damage to target player for each tarot in your recycle bin. If you also control [Luna, the Sacred Moon], double this effect."
+141,AMETHYST DATASHARD,Program,Datashard,Mystic,,,,2,,,Uncommon,4,,,,Bioframe,"If a source would deal [Bioframe] damage to you, prevent that damage and put a fracture counter on Amethyst Datashard. // Whenever you put a fracture counter on Amethyst Datashard, if it has 2 or more, purge it."
+142,MOONSTONE DATASHARD,Program,Datashard,Mystic,,,,3,,,Common,4,,,,Both,"When you play a tarot, gain 1 [Mainframe] and 1 [Bioframe] health."
+143,DARKSTONE DATASHARD,Program,Datashard,Mystic,,,,3,,,Common,4,,,,Mainframe,"When you play a tarot, deal 1 [Mainframe] damage to each opponent."
+144,BUTTERFLY EFFECT,Program,,Mystic,,,,3,,,Quantum Rare,4,Yes,SYSTEM CHECK,,Mainframe,"On enter, create a [Mainframe] 0/1 Butterfly token character. // On your SYSTEM CHECK, double the number of Butterfly token characters you control."
+145,THE FOOL,Program,Tarot,Mystic,,,,1,,,Common,4,,SWIFT,,,"SWIFT Draw 1, then discard 1."
+146,THE MAGICIAN,Program,Tarot,Mystic,,,,1,,,Uncommon,4,,SWIFT,,,SWIFT Put target program on the cache on top of it's owner's cyberdeck.
+147,THE HIGH PRIESTESS,Program,Tarot,Mystic,,,,3,,,Rare,4,,"SWIFT, REVERSED",,,SWIFT Counter target character. // REVERSED program
+148,THE EMPRESS,Program,Tarot,Mystic,,,,3,,,Uncommon,4,,"SWIFT, REVERSED",,,SWIFT Draw 1 and install 1 RAM running. // REVERSED 2 RAM.
+149,THE EMPEROR,Program,Tarot,Mystic,,,,3,,,Uncommon,4,,"SWIFT, REVERSED",,,SWIFT Put up to 2 target characters into their owners' hands. // REVERSED programs
+150,THE HIEROPHANT,Program,Tarot,Mystic,,,,1,,,Common,4,,"SWIFT, REVERSED",,,SWIFT Counter target card unless its controller pays 1 RAM. // REVERSED 3 RAM
+151,THE LOVERS,Program,Tarot,Mystic,,,,3,,,Uncommon,4,,SWIFT,,,"SWIFT Put two +1/+1 counters on 2 target characters. When one of these characters is destroyed, destroy the other."
+152,THE CHARIOT,Program,Tarot,Mystic,,,,2,,,Rare,4,,"SWIFT, REVERSED",,,SWIFT Change the target(s) of target program. // REVERSED ability
+153,STRENGTH,Program,Tarot,Mystic,,,,1,,,Common,4,,"SWIFT, REVERSED",,,SWIFT Target character gets +2/+2 until turn end. // REVERSED -2/-2
+154,THE HERMIT,Program,Tarot,Mystic,,,,2,,,Common,4,,"SWIFT, REVERSED",,,SWIFT Put target character into its owner's hand. // REVERSED on top of its owner's cyberdeck.
+155,WHEEL OF FORTUNE,Program,Tarot,Mystic,,,,2,,,Uncommon,4,,"SWIFT, REVERSED",,,"SWIFT Name a RAM cost, then reveal the top card of your cyberdeck. If its RAM cost is the named cost, install 1 RAM running. // REVERSED draw 2."
+156,JUSTICE,Program,Tarot,Mystic,,,,4,,,Common,4,,SWIFT,,Mainframe,"SWIFT If a character's attack hits target player this turn, prevent half that damage, rounded down, and deal [Mainframe] damage equal to the prevented damage to that character's controller."
+157,THE HANGED MAN,Program,Tarot,Mystic,,,,3,,,Uncommon,4,,"SWIFT, ADDITIONAL COST",Mystic,,SWIFT ADDITIONAL COST [Destroy a [Mystic] character you control.] // Counter target card.
+158,DEATH,Program,Tarot,Mystic,,,,4,,,Common,4,,,,Mainframe,"Destroy target character. If you do, its controller creates a [Mainframe] 2/2 Revenant token character."
+159,TEMPERANCE,Program,Tarot,Mystic,,,,1,,,Common,4,,"SWIFT, REVERSED",,,SWIFT Target character can't be destroyed this turn. // REVERSED program
+160,THE DEVIL,Program,Tarot,Mystic,,,,3,,,Uncommon,4,,"SWIFT, PSYCHOSIS, REVERSED",,,SWIFT Target character gets +10 PSYCHOSIS until turn end. It must attack this turn if able. // REVERSED +15
+161,THE TOWER,Program,Tarot,Mystic,,,,3,,,Rare,4,,SWIFT,,,"SWIFT Reveal the top 4 cards of your cyberdeck. Target opponent puts them facedown into 2 piles. Put 1 pile into your hand, then bin the other."
+162,THE STAR,Program,Tarot,Mystic,,,,2,,,Common,4,,"SWIFT, DIVINE",,,"SWIFT DIVINE 3 (Look at the top 3 cards of your cyberdeck. Put 1 into your hand, then bin the rest.)"
+163,THE MOON,Program,Tarot,Mystic,,,,2,,,Common,4,,"SWIFT, REVERSED",,,"SWIFT Run X target characters, where X is the number of tarots played this turn. // REVERSED cards"
+164,THE SUN,Program,Tarot,Mystic,,,,2,,,Uncommon,4,,"SWIFT, REVERSED",,,"SWIFT Search your cyberdeck for a tarot and reveal it. Put it into your hand, then shuffle. // REVERSED program"
+165,JUDGEMENT,Program,Tarot,Mystic,,,,4,,,Common,4,,"SWIFT, REVERSED",,,"SWIFT Until turn end, whenever a character you control is destroyed by an opponent, destroy target character. // REVERSED program"
+166,THE WORLD,Program,Tarot,Mystic,,,,3,,,Uncommon,4,,SWIFT,,,"SWIFT Search your cyberdeck for an environment and reveal it. Put it into your hand, then shuffle."
+167,THIRD EYE,Gear,Cyberware,Mystic,,,,2,,,Uncommon,4,,,,,Opponents play with their hands revealed. // You may look at any facedown cards in play.
+168,ZEN GARDEN,Program,Environment,Mystic,,,,3,,,Uncommon,4,,NETCHECK,,,"Prevent all damage. // On NETCHECK, add 1 anicca counter to Zen Garden. Then, if it has 5 or more, destroy it. // If Zen Garden would leave play, purge it."
+169,SETU SIMULATION,Program,Environment,Mystic,,,,2,,,Rare,4,,NETCHECK,Mystic,,"On NETCHECK, the active player may purge a character they control to put target [Mystic] character from their recycle bin into their hand."
+170,THE SPIRIT REALM,Program,Environment,Mystic,,,,7,,,Rare,4,,SPIRIT,,,"On enter, all characters in recycle bins that share a faction with their owner's mainframe are put into play under their owner's control with a SPIRIT counter on them. (Character’s RAM cost is set to 0. If they would leave play, purge them instead.) // When The Spirit Realm leaves play, purge all characters with SPIRIT counters."
+171,ROADIE,Character,,Thrasher,,,Bioframe,1,1,1,Common,4,,,,,Install 1 RAM running.
+172,SINISTER MANAGER,Character,,Corpo,Thrasher,,Bioframe,3,1,1,Uncommon,4,,OVERRUN,Thrasher,,"On enter, until Sinister Manager leaves play, target iconic [Thrasher] character you control gets +4/+4 and OVERRUN. (Character deals excess damage to defending player when blocked.) // When Sinister Manager leaves play, destroy that character."
+173,GROUPIE,Character,,Thrasher,,,Bioframe,1,0,1,Common,4,,,Thrasher,,"On enter, target iconic [Thrasher] character you control gets +2/+0 until Groupie leaves play."
+174,STAGE DIVER,Character,,Thrasher,,,Bioframe,2,1,1,Uncommon,4,,,,Bioframe,"Destroy Stage Diver. If you do, deal 1 [Bioframe] damage to up to 2 target characters."
+175,FRENZIED FAN,Character,,Thrasher,,,Bioframe,2,2,1,Uncommon,4,,,,Both,"If Frenzied Fan would be destroyed, you may pay 2 [Mainframe] and 2 [Bioframe] health to put them into their owner's hand instead."
+176,MOSHER,Character,,Thrasher,,,Bioframe,3,2,2,Uncommon,4,,,,Bioframe,Deal 1 [Bioframe] damage to all other characters in play. Put a -1/-1 counter on Mosher.
+177,EDWARD 40 HANDS,Character,,Thrasher,,,Bioframe,2,0,2,Rare,4,,NETCHECK,,,"On your NETCHECK, put 1 drink counter to Edward 40 Hands. // Edward 40 Hands gets +4/+0 for every 2 drink counters on him."
+178,SHREDDER,Character,,Thrasher,,,Bioframe,2,2,2,Common,4,,FEEDBACK,,Bioframe,"FEEDBACK (Whenever character is dealt damage, it deals that much [Bioframe] damage to the source's controller.)"
+179,SKIN SMASHER,Character,,Thrasher,,,Bioframe,2,2,2,Common,4,,,Thrasher,,Other [Thrasher] characters you control get +1/+1 until turn end.
+180,NAMELESS,Character,,Thrasher,,,Bioframe,3,2,3,Uncommon,4,,,,,Destroy target program.
+181,"VIC VIPER, AXE GOD",Character,,Thrasher,,,Bioframe,4,5,2,Rare,4,Yes,,Thrasher,,"Until turn end, all [Thrasher] characters get +2/+0 and all other characters get -1/-1."
+182,XAX XANTHOS,Character,,Thrasher,,,Bioframe,4,0,5,Rare,4,Yes,PSYCHOSIS,Thrasher,,"Until turn end, all non-[Thrasher] characters get +10 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.)"
+183,ROXY RIOT,Character,,Thrasher,,,Bioframe,4,5,2,Quantum Rare,4,Yes,NETCHECK,,Bioframe,"On your NETCHECK, put 1 rage counter on Roxy Riot. When her attack hits a player, she deals 1 [Bioframe] damage to them for each rage counter on her. When a player destroys her, deal 3 [Bioframe] damage to them for each rage counter on her."
+184,JETT THORN,Character,,Thrasher,,,Bioframe,5,7,3,Quantum Rare,4,Yes,OVERRUN,Thrasher,,"Destroy target running character. // Until turn end, [Thrasher] characters you control get +2/+0 and OVERRUN."
+185,WALL OF DEATH,Program,Protocol,Thrasher,,,,3,,,Rare,4,,NETCHECK,Thrasher,,"On NETCHECK, put 1 mosh counter on Wall of Death. Then, if it has 2 or more mosh counters, purge it. If you do, until turn end, all characters must attack or block if able and all [Thrasher] characters get +2/+2."
+186,DEATH METAL,Program,Script,Thrasher,,,,2,,,Common,4,,,,,Destroy target character.
+187,BEATDOWN,Program,Script,Thrasher,,,,1,,,Common,4,,,,Both,Destroy target character. You lose [Mainframe] and [Bioframe] health equal to its attack value.
+188,TRAMPLE,Program,Script,Thrasher,,,,1,,,Common,4,,SWIFT,,,SWIFT Destroy target blocking character with defense value of 2 or less.
+189,RUSH THE STAGE,Program,Script,Thrasher,,,,5,,,Quantum Rare,4,,"SWIFT, ADDITIONAL COST",Thrasher,Both,"SWIFT ADDITIONAL COST [Pay X [Mainframe] and X [Bioframe] health.] // Target [Thrasher] character gets +X/+0 until turn end. On turn end, destroy it."
+190,PLASMA SHACKLE,Gear,Cyberware,Thrasher,,,,2,,,Uncommon,4,,"PSYCHOSIS, MALICIOUS, NETCHECK",,,"MALICIOUS (Attach to any target character.) // Attached character gets +8 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.) // On its controller's NETCHECK, put a -1/-1 counter on attached character."
+191,SIPHON GAUNTLET,Gear,Cyberware,Thrasher,,,,3,,,Uncommon,4,,BIOVAMP,,Bioframe,"Attached character gets BIOVAMP (When character’s attack hits a player for [Bioframe] damage, you gain that much [Bioframe] health.)"
+192,BATTLE AXE,Gear,Weapon,Thrasher,,,,3,,,Uncommon,4,,,,Bioframe,"Attached character gets +3/+0. When it becomes blocked, it deals 1 [Bioframe] damage to each character blocking it."
+193,GIGADYNE AMP,Gear,Cyberware,Thrasher,,,,5,,,Uncommon,4,,,,,Double the base attack value of attached character.
+194,DEMON SHARD,Gear,Weapon,Thrasher,,,,4,,,Rare,4,,,,Bioframe,"Put two -1/-1 counters on attached character, then deal 6 [Bioframe] damage to up to 3 target characters."
+195,BRAINSHREDDER,Gear,Cyberware,Thrasher,,,,3,,,Rare,4,,"PSYCHOSIS, MALICIOUS",Xax Xanthos,,"MALICIOUS (Attach to any target character.) // Attached character can't be force quit and gets +15 PSYCHOSIS. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.) // If attached to [Xax Xanthos], he gets +6/+0 and is immune to PSYCHOSIS."
+196,OVERDRIVER,Gear,Cyberware,Thrasher,,,,2,,,Uncommon,4,,"PSYCHOSIS, MALICIOUS",,,MALICIOUS (Attach to any target character.) // Attached character can't be force quit. Double its PSYCHOSIS.
+197,WHAMMY BAR,Gear,Weapon,Thrasher,,,,1,,,Uncommon,4,,,,,Destroy target running character.
+198,DEATH WISH,Program,Environment,Thrasher,,,,4,,,Rare,4,,,Thrasher,Bioframe,"Whenever a non-[Thrasher] character takes [Bioframe] damage, destroy them."
+199,MOSH PIT,Program,Environment,Thrasher,,,,2,,,Uncommon,4,,,,,Damage can't be prevented.
+200,NANOBOT SWARM,Character,,Nanobot,,,Bioframe,2,0,1,Common,0,,,"Nanobot Swarm, Nanobot",,A cyberdeck can have any number of cards named [Nanobot Swarm]. // Nanobot Swarm gets +1/+0 for each other [Nanobot] character you control.
+201,NANOBOT HARVESTER,Character,,Nanobot,,,Bioframe,1,1,1,Common,4,,,,,Install 1 RAM running.
+202,NANOBOT MESSENGER,Character,,Nanobot,,,Bioframe,1,1,1,Uncommon,4,,,"Xandra, Hive Queen",,"Search your cyberdeck for [Xandra, Hive Queen] and reveal her. Put her into your hand, then shuffle. Purge Nanobot Messenger."
+203,"XANDRA, HIVE QUEEN",Character,,Nanobot,,,Bioframe,3,4,3,Quantum Rare,4,Yes,ADDITIONAL COST,Nanobot,Bioframe,"ADDITIONAL COST [Run 2 [Nanobot] characters you control.] // ADDITIONAL COST [Run and destroy any number of [Nanobot] characters you control.] For each [Nanobot] destroyed this way, deal [Bioframe] damage equal to its attack value to target character."
+204,MAD HONEY,Program,Drug,Nanobot,,,,3,,,Uncommon,4,,OVERRUN,Nanobot,,"Until turn end, [Nanobot] characters you control get +1/+1 and OVERRUN. // (Character deals excess damage to defending player when blocked.)"
+205,THE HIVE,Program,Environment,Nanobot,,,,3,,,Rare,4,,NETCHECK,Nanobot,Bioframe,"On NETCHECK, the active player creates a [Bioframe] 1/1 [Nanobot] Drone token character."
+206,"ALICE, DREAMWALKER",Character,,Wonderland,,,Mainframe,2,1,2,Quantum Rare,4,Yes,INVERT,Wonderland,,"Put an INVERT counter on target [Wonderland] character. If it already has one, remove 1 instead. (Character swaps its attack type.) // If you control a Pawn token, a Bishop token, and a Rook token, and your opponents control a total of 1 character, you win the game."
+207,QUEEN OF HEARTS,Character,,Cybernetic,Wonderland,,Bioframe,5,5,3,Quantum Rare,4,Yes,,,,Destroy up to 2 target characters.
+208,WHITE KNIGHT,Character,,Wonderland,,Robot,Mainframe,2,1,1,Uncommon,4,,,,Both,Gain 2 [Mainframe] or 2 [Bioframe] health.
+209,RED KNIGHT,Character,,Wonderland,,Robot,Bioframe,2,1,1,Uncommon,4,,,,Both,Deal 2 [Mainframe] or 2 [Bioframe] damage to target player.
+210,MAD HATTER,Character,,Hacker,Wonderland,,Mainframe,4,3,2,Rare,4,,,Wonderland,,"When Mad Hatter leaves play, destroy all characters with tea party counters. // Reveal the top 2 cards of your cyberdeck. Put a [Wonderland] character from among them into play with a tea party counter on it and set its RAM cost to 0. Bin the rest."
+211,BIG KAT,Character,,Corpo,Wonderland,,Bioframe,3,2,2,Common,4,,,Wonderland,,Put a -1/-1 counter on target character. // Put a +1/+1 counter on another target [Wonderland] character.
+212,WONDERLAND,Program,Environment,Wonderland,,,,3,,,Rare,4,,"INVERT, NETCHECK",,,"On NETCHECK, the active player may roll a d20. If they control (Alice, Dreamwalker), they roll twice instead. // 1–3 | They destroy a character they control, unless they control (Alice, Dreamwalker). // 4–17 | They may choose target character and put an INVERT counter on it. If it already has one, remove 1 instead. (Character swaps its attack type.) // 18+ | They reveal the top card of their cyberdeck. If it can be played, they set its RAM cost to 0 and play it; if not, bin it."
+213,CHESHIRE.RAR,Program,Virus,Wonderland,,,,2,,,Uncommon,4,,SYSTEM CHECK,Wonderland,Both,"Attach to target player's mainframe. The following abilities only trigger if your [Wonderland] synergy is 2 or more: // When this becomes attached to a mainframe, if it's an opponent's, deal 1 [Mainframe] or 1 [Bioframe] damage to them; if it's yours or a teammate's, you gain 1 [Mainframe] or 1 [Bioframe] health. // On your SYSTEM CHECK, attach this to a different mainframe if possible."
+214,DRINK ME,Program,Drug,Wonderland,,,,3,,,Common,4,,SWIFT,"Alice, Dreamwalker",,"SWIFT All characters your opponents control get -1/-1 until turn end. // If you control [Alice, Dreamwalker], instead put a -1/-1 counter on these characters."
+215,EAT ME,Program,Drug,Wonderland,,,,3,,,Common,4,,SWIFT,"Alice, Dreamwalker",,"SWIFT All characters you control get +1/+1 until turn end. // If you control [Alice, Dreamwalker], instead put a +1/+1 counter on these characters."
+216,THROUGH THE LOOKING GLASS,Program,Script,Wonderland,,,,3,,,Uncommon,4,,"SWIFT, INVERT",,,"SWIFT Put an INVERT counter on target character. If it already has one, remove 1 instead. (Character swaps its attack type.)"
+217,JABBERWOCKY,Character,,Cybernetic,Wonderland,,Mainframe,6,9,9,Rare,4,Yes,,,,
+218,B.O.B.,Character,,,,Robot,Bioframe,2,0,2,Common,4,,,,Both,"Destroy B.O.B. If you do, deal 4 [Mainframe] and 4 [Bioframe] damage to all players, and deal 4 [Bioframe] damage to all characters."
+219,THE SINGULARITY,Character,,,,A.I.,Mainframe,7,1,6,Quantum Rare,4,Yes,,,,"On enter, destroy all RAM you control. // The RAM cost of all cards in play that you control and their activated abilities is 0. // Until turn end, you may play up to 2 cards without paying their RAM cost."
+220,PROJECT ARCHANGEL,Character,,,,Mech,Bioframe,7,10,10,Quantum Rare,4,Yes,"ARMOR, SYSTEM CHECK",,,"Project Archangel can’t attack or block unless it has 1 or more ARMOR counters. On your SYSTEM CHECK, if it has no ARMOR counters, put 1 on it. (If character would be destroyed, instead remove an ARMOR counter from it.) // Destroy all other characters and programs. On turn end, purge Project Archangel."
+221,SHORT CIRCUIT,Program,Script,Null,,,,1,,,Common,4,,SWIFT,,,SWIFT Destroy target cyberware.
+222,DÉJÀ VU,Program,Script,Null,,,,6,,,Quantum Rare,4,,ADDITIONAL COST,,Both,ADDITIONAL COST [Pay 3 [Mainframe] and 3 [Bioframe] health.] // Take an extra turn after this one. Purge Déjà Vu.
+223,NEURAL DISRUPTOR,Gear,Cyberware,Null,,,,3,,,Rare,4,,"PSYCHOSIS, MALICIOUS",,,"MALICIOUS (Attach to any target character.) // Attached character gets +15 PSYCHOSIS and must attack if able. (When character attacks or runs, roll a d20. If you roll less than its PSYCHOSIS, its attack hits you and this action fails.)"
+224,ANTIVIRUS,Program,Script,Null,,,,1,,,Common,4,,SWIFT,,,SWIFT Select one — // • Destroy target program attached to your mainframe. // • Remove all counters on your mainframe.
+225,TERMINATE,Program,Script,Null,,,,2,,,Common,4,,SWIFT,,,SWIFT Destroy target program.
+226,DELETE,Program,Script,Null,,,,4,,,Common,4,,,,,Destroy target character.
+227,SOLAR FLARE,Program,Script,Null,,,,6,,,Rare,4,,,,,Destroy all characters and programs.
+228,GARBAGE DAY,Program,Script,Null,,,,3,,,Uncommon,4,,,,,Purge all recycle bins.
+229,SPECTRE 9MM,Gear,Weapon,Null,,,,1,,,Common,4,,,,,Attached character gets +2/+0.
+230,SIMULATED SOLACE,Program,Virus,Null,,,,2,,,Uncommon,4,,SYSTEM CHECK,,Both,"Attach to target player's mainframe. On their SYSTEM CHECK, they take 2 [Mainframe] and 2 [Bioframe] damage, then they draw 1."
+231,CROSSFADE,Program,Environment,Null,,,,1,,,Uncommon,4,,NETCHECK,,,"On NETCHECK, the active player may destroy 1 RAM they control to draw 1."
+232,SUPERSYMMETRY,Program,Environment,Null,,,,2,,,Rare,4,,,,,All characters' base attack values are swapped with their base defense values.
+233,MULTIVERSE,Program,Environment,Null,,,,2,,,Quantum Rare,4,,,,,"There can be any number of environments in play. Environments aren't destroyed when a new environment enters. // When Multiverse leaves play, purge all other environments."
+234,ACID RAIN,Program,Environment,Null,,,,4,,,Uncommon,4,,NETCHECK,,Bioframe,"On NETCHECK, Acid Rain deals 1 [Bioframe] damage to all characters."
+235,FIRESTARTER,Mainframe,,Hacker,,,,,,,Common,4,,,,Mainframe,"Deal 1 [Mainframe] damage to any target. // Instead, deal 2 [Mainframe] damage to any target."
+236,DEEPNET,Mainframe,,Hacker,,,,,,,Common,4,,,,Mainframe,Deal 2 [Mainframe] damage to target player. // + Draw 1.
+237,SYNTHETIX,Mainframe,,Cybernetic,,,,,,,Common,4,,,,,"+1/+1 for each cyberware attached to them. // Instead, +2/+1 for each cyberware attached to them."
+238,GEARHEAD,Mainframe,,Cybernetic,,,,,,,Common,4,,PSYCHOSIS,,,"-5 PSYCHOSIS. // Instead, -10 PSYCHOSIS."
+239,A-Z LUXUREON,Mainframe,,Corpo,,,,,,,Common,4,,SYSTEM CHECK,,,"Your RAM comes into play refreshed. // + / On your SYSTEM CHECK, install 1 RAM refreshed."
+240,OMNIS BLOOD DIAMOND,Mainframe,,Corpo,,,,,,,Common,4,,,,Both,"You lose 1 [Mainframe] and 1 [Bioframe] health. Install 1 RAM running. // Instead, you lose 2 [Mainframe] and 2 [Bioframe]. Install 2 RAM refreshed."
+241,COYOTE,Mainframe,,Dustrunner,,,,,,,Common,4,,,Dustrunner,,"When you a play a tether, draw 1. // + / When you play a [Dustrunner] character, draw 1."
+242,SIDEWINDER,Mainframe,,Dustrunner,,,,,,,Common,4,,MIRAGE,,,"MIRAGE (When character is targeted by an opponent, you may put it into its owner’s hand.) // + They can only be blocked by 2 or more characters."
+243,RADIANT,Mainframe,,Mystic,,,,,,,Common,4,,,,,"When you play a tarot, look at the top card of your cyberdeck. You may bin it. // + / You may play tarots reversed."
+244,ECLIPSE,Mainframe,,Mystic,,,,,,,Common,4,,,,Mainframe,"When you play a tarot, create a [Mainframe] 0/1 Dreamwalker token character. // + / All Dreamwalker tokens get +1/+1."
+245,HEADBANGER,Mainframe,,Thrasher,,,,,,,Common,4,,,,,"+1/+1 until turn end. // Instead, +2/+2 until turn end."
+246,BERSERKER,Mainframe,,Thrasher,,,,,,,Common,4,,OVERRUN,,,+1/+0 until turn end. // + OVERRUN until turn end. (Character deals excess damage to defending player when blocked.)
+247,MELTDOWN,Mainframe,,Dustrunner,Hacker,,,,,,Uncommon,4,,,,,"Put a +1/+1 counter on target character. // Instead, put two +1/+1 counters on target character."
+248,NEXUS,Mainframe,,Corpo,Cybernetic,,,,,,Uncommon,4,,,,,"+1/+1 until turn end. // Instead, +2/+2 until turn end."
+249,AURORA,Mainframe,,Dustrunner,Mystic,,,,,,Uncommon,4,,DIVINE,"Mystic, Dustrunner",,"DIVINE 2 (Look at the top 2 cards of your cyberdeck. Put 1 into your hand, then bin the other.) // Instead, DIVINE 2 for each blocked [Mystic] or [Dustrunner]."
+250,SAVAGE,Mainframe,,Cybernetic,Thrasher,,,,,,Uncommon,4,,"STAMINA, FEEDBACK","Cybernetic, Thrasher",,Characters you control with [Cybernetic] gear get STAMINA. // + / Characters you control with [Thrasher] gear get FEEDBACK.
+251,SPOTLIGHT,Mainframe,,Corpo,Thrasher,,,,,,Uncommon,4,,,,,"Once per turn, install 1 RAM running. // Instead, install 1 RAM running."
+252,AETHERNET,Mainframe,,Hacker,Mystic,,,,,,Uncommon,4,,,,,"For double their cost. As they resolve, purge them. // Instead, for their base cost. As they resolve, purge them."
+253,HIVE DYNAMICS,Mainframe,,Nanobot,,,,,,,Rare,4,,,Nanobot,Bioframe,"When 1 or more non-token [Nanobot] characters you control are destroyed by an opponent, create a [Bioframe] 1/1 [Nanobot] Drone token character. // + / All [Nanobot] characters you control get +1/+1."
+254,WNDRTECH,Mainframe,,Wonderland,,,,,,,Rare,4,,,,Both,0/1 Pawn token character with [Mainframe] or [Bioframe] attack. // Or 3/3 Bishop token character with [Mainframe] or [Bioframe] attack.
+256,"TERRY, THE ACCOUNTANT",Character,,Corpo,,,Bioframe,3,0,3,Quantum Rare,4,Yes,PSYCHOSIS,,,"Terry, the Accountant is immune to PSYCHOSIS. // Swipe Terry, the Accountant across the arena like a credit card. Attach target gear to him."

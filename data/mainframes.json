@@ -1,0 +1,64 @@
+{
+  "_comment": "Mainframe lead-in text and synergy tiers, read from the official card images at playneuroscape.com/cards on 2026-10-03. The fan database dropped the lead-ins and thresholds. 'needs' = synergy required per faction; 'mode' = how the tier combines with the previous one (base | instead | adds | or). Synthetix effect numbers come from the fan database (small text on the card); everything else was read from the card image.",
+  "235": { "lead": "When you play a [Hacker] script —", "tiers": [
+    { "needs": { "Hacker": 2 }, "mode": "base", "text": "Deal 1 [Mainframe] damage to any target." },
+    { "needs": { "Hacker": 4 }, "mode": "instead", "text": "Deal 2 [Mainframe] damage to any target." } ] },
+  "236": { "lead": "When you play a protocol —", "tiers": [
+    { "needs": { "Hacker": 2 }, "mode": "base", "text": "Deal 2 [Mainframe] damage to target player." },
+    { "needs": { "Hacker": 4 }, "mode": "adds", "text": "Draw 1." } ] },
+  "237": { "lead": "All [Cybernetic] characters you control get —", "tiers": [
+    { "needs": { "Cybernetic": 2 }, "mode": "base", "text": "+1/+1 for each cyberware attached to them." },
+    { "needs": { "Cybernetic": 4 }, "mode": "instead", "text": "+2/+1 for each cyberware attached to them." } ] },
+  "238": { "lead": "Characters you control get —", "tiers": [
+    { "needs": { "Cybernetic": 2 }, "mode": "base", "text": "-5 PSYCHOSIS." },
+    { "needs": { "Cybernetic": 4 }, "mode": "instead", "text": "-10 PSYCHOSIS." } ] },
+  "239": { "lead": "", "tiers": [
+    { "needs": { "Corpo": 2 }, "mode": "base", "text": "Your RAM comes into play refreshed." },
+    { "needs": { "Corpo": 4 }, "mode": "adds", "text": "On your SYSTEM CHECK, install 1 RAM refreshed." } ] },
+  "240": { "lead": "On your NETCHECK —", "tiers": [
+    { "needs": { "Corpo": 2 }, "mode": "base", "text": "You lose 1 [Mainframe] and 1 [Bioframe] health. Install 1 RAM running." },
+    { "needs": { "Corpo": 4 }, "mode": "instead", "text": "You lose 2 [Mainframe] and 2 [Bioframe] health. Install 2 RAM refreshed." } ] },
+  "241": { "lead": "", "tiers": [
+    { "needs": { "Dustrunner": 2 }, "mode": "base", "text": "When you play a tether, draw 1." },
+    { "needs": { "Dustrunner": 4 }, "mode": "adds", "text": "When you play a [Dustrunner] character, draw 1." } ] },
+  "242": { "lead": "All [Dustrunner] characters you control get —", "tiers": [
+    { "needs": { "Dustrunner": 2 }, "mode": "base", "text": "MIRAGE (When character is targeted by an opponent, you may put it into its owner's hand.)" },
+    { "needs": { "Dustrunner": 4 }, "mode": "adds", "text": "They can only be blocked by 2 or more characters." } ] },
+  "243": { "lead": "", "tiers": [
+    { "needs": { "Mystic": 2 }, "mode": "base", "text": "When you play a tarot, look at the top card of your cyberdeck. You may bin it." },
+    { "needs": { "Mystic": 4 }, "mode": "adds", "text": "You may play tarots reversed." } ] },
+  "244": { "lead": "", "tiers": [
+    { "needs": { "Mystic": 2 }, "mode": "base", "text": "When you play a tarot, create a [Mainframe] 0/1 Dreamwalker token character." },
+    { "needs": { "Mystic": 4 }, "mode": "adds", "text": "All Dreamwalker tokens get +1/+1." } ] },
+  "245": { "lead": "Whenever you destroy a character an opponent controls, [Thrasher] characters you control get —", "tiers": [
+    { "needs": { "Thrasher": 2 }, "mode": "base", "text": "+1/+1 until turn end." },
+    { "needs": { "Thrasher": 4 }, "mode": "instead", "text": "+2/+2 until turn end." } ] },
+  "246": { "lead": "Whenever a [Thrasher] character you control attacks, it gets —", "tiers": [
+    { "needs": { "Thrasher": 2 }, "mode": "base", "text": "+1/+0 until turn end." },
+    { "needs": { "Thrasher": 4 }, "mode": "adds", "text": "OVERRUN until turn end. (Character deals excess damage to defending player when blocked.)" } ] },
+  "247": { "lead": "When you play a [Hacker] or [Dustrunner] program, you may —", "tiers": [
+    { "needs": { "Hacker": 1, "Dustrunner": 1 }, "mode": "base", "text": "Put a +1/+1 counter on target character." },
+    { "needs": { "Hacker": 2, "Dustrunner": 2 }, "mode": "instead", "text": "Put two +1/+1 counters on target character." } ] },
+  "248": { "lead": "Whenever you install a RAM, you may give target character —", "tiers": [
+    { "needs": { "Cybernetic": 1, "Corpo": 1 }, "mode": "base", "text": "+1/+1 until turn end." },
+    { "needs": { "Cybernetic": 2, "Corpo": 2 }, "mode": "instead", "text": "+2/+2 until turn end." } ] },
+  "249": { "lead": "When 1 or more [Mystic] or [Dustrunner] characters you control are blocked —", "tiers": [
+    { "needs": { "Mystic": 1, "Dustrunner": 1 }, "mode": "base", "text": "DIVINE 2 (Look at the top 2 cards of your cyberdeck. Put 1 into your hand, then bin the other.)" },
+    { "needs": { "Mystic": 2, "Dustrunner": 2 }, "mode": "instead", "text": "DIVINE 2 for each blocked [Mystic] or [Dustrunner]." } ] },
+  "250": { "lead": "", "tiers": [
+    { "needs": { "Thrasher": 1, "Cybernetic": 1 }, "mode": "base", "text": "Characters you control with [Cybernetic] gear get STAMINA. (Character doesn't run when it attacks.)" },
+    { "needs": { "Thrasher": 2, "Cybernetic": 2 }, "mode": "adds", "text": "Characters you control with [Thrasher] gear get FEEDBACK. (Whenever character is dealt damage, it deals that much [Bioframe] damage to the source's controller.)" } ] },
+  "251": { "lead": "Whenever you destroy a character an opponent controls —", "tiers": [
+    { "needs": { "Thrasher": 1, "Corpo": 1 }, "mode": "base", "text": "Once per turn, install 1 RAM running." },
+    { "needs": { "Thrasher": 2, "Corpo": 2 }, "mode": "instead", "text": "Install 1 RAM running." } ] },
+  "252": { "lead": "You may play tarots or [Hacker] scripts from your recycle bin —", "tiers": [
+    { "needs": { "Hacker": 1, "Mystic": 1 }, "mode": "base", "text": "For double their cost. As they resolve, purge them." },
+    { "needs": { "Hacker": 2, "Mystic": 2 }, "mode": "instead", "text": "For their base cost. As they resolve, purge them." } ] },
+  "253": { "lead": "", "tiers": [
+    { "needs": { "Nanobot": 3 }, "mode": "base", "text": "When 1 or more non-token [Nanobot] characters you control are destroyed by an opponent, create a [Bioframe] 1/1 [Nanobot] Drone token character." },
+    { "needs": { "Nanobot": 6 }, "mode": "adds", "text": "All [Nanobot] characters you control get +1/+1." } ] },
+  "254": { "lead": "When you play a [Wonderland] program, create a —", "tiers": [
+    { "needs": { "Wonderland": 1 }, "mode": "base", "text": "0/1 Pawn token character with [Mainframe] or [Bioframe] attack." },
+    { "needs": { "Wonderland": 3 }, "mode": "or", "text": "3/3 Bishop token character with [Mainframe] or [Bioframe] attack." },
+    { "needs": { "Wonderland": 5 }, "mode": "or", "text": "5/5 Rook token character with [Mainframe] or [Bioframe] attack." } ] }
+}

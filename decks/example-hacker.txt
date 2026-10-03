@@ -1,0 +1,15 @@
+Deck: Example hacker (not tuned)
+Mainframe: Firestarter
+4 Admin
+4 Coder
+4 Script Kiddie
+4 Deep Diver
+4 Digital Spectre
+4 Black Hat
+4 Phantom OS
+4 Anima Proxy
+4 Tagger
+4 Serial Killer
+4 The Prodigy
+4 Hex, Codemancer
+2 Nova, the White Rabbit

@@ -1,0 +1,12 @@
+{
+  "name": "neuroscape-deck-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Unofficial fan tool: browse Neuroscape Genesis cards, find synergies, build and share decks. No build step, no dependencies.",
+  "scripts": {
+    "data": "node scripts/build-data.mjs",
+    "start": "node scripts/serve.mjs",
+    "test": "node --test"
+  }
+}
