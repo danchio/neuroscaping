@@ -529,3 +529,50 @@ test('router: query strings and deck tabs', () => {
   assert.equal(href.cards('fac=Hacker'), '#/cards?fac=Hacker');
   assert.deepEqual(parse('#/card/12'), { name: 'card', id: 12 });
 });
+
+// ---- card images ----
+import { cardImageUrl, cardAlt, rulesPlain, IMAGE_SOURCES, nextSource, firstSource, markPrimaryFailed, resetPrimaryFailed } from '../src/lib/cardimg.js';
+
+test('image urls: primary and fallback by card id', () => {
+  const c = card('Admin');
+  assert.equal(cardImageUrl(c, 'primary'), `https://storage.googleapis.com/spicerack_media/cards/neuroscape/GEN-${c.id}.webp`);
+  assert.equal(cardImageUrl(c, 'fallback'), `https://static.playset.pro/neuroscape/cards/en/GEN-${c.id}.webp`);
+  assert.equal(cardImageUrl(c), cardImageUrl(c, 0), 'primary is the default and index 0');
+  assert.equal(cardImageUrl(256), 'https://storage.googleapis.com/spicerack_media/cards/neuroscape/GEN-256.webp');
+});
+
+test('image urls: every card in the dataset has one, 255 (Basic RAM) and junk do not', () => {
+  assert.ok(cards.every((c) => /\/GEN-\d+\.webp$/.test(cardImageUrl(c, 'primary')) && cardImageUrl(c, 'fallback')));
+  assert.ok(!cards.some((c) => c.id === 255));
+  for (const bad of [255, 0, -1, 257, 1.5, NaN, null, undefined, '12']) assert.equal(cardImageUrl(bad), '', String(bad));
+  assert.equal(cardImageUrl(1, 'nope'), '');
+});
+
+test('image sources fall back in order, then to the text card', () => {
+  assert.equal(IMAGE_SOURCES.length, 2);
+  assert.equal(nextSource(0), 1);
+  assert.equal(nextSource(1), 'text');
+  resetPrimaryFailed();
+  assert.equal(firstSource(), 0);
+  markPrimaryFailed();
+  assert.equal(firstSource(), 1, 'after a primary failure the session starts at the fallback');
+  resetPrimaryFailed();
+});
+
+test('alt text carries name, type, factions and the full rules text', () => {
+  const c = card('Hex, Codemancer');
+  const alt = cardAlt(c);
+  assert.match(alt, /^HEX, CODEMANCER\. Character, Hacker\. RAM cost 4\./);
+  for (const line of c.text) assert.ok(alt.includes(line.replace(/[\[\]]/g, '')), line);
+  assert.ok(!/[\[\]]/.test(alt), 'brackets are removed');
+  assert.match(alt, /DDOS ATTACK: run 2 RAM\./);
+});
+
+test('alt text for a mainframe reads the lead-in and every tier', () => {
+  const m = mainframes[0];
+  const alt = cardAlt(m);
+  assert.ok(alt.startsWith(`${m.name}. Mainframe`));
+  assert.equal(rulesPlain(m).length, m.mainframe.tiers.length + (m.mainframe.lead ? 1 : 0));
+  for (const t of m.mainframe.tiers) assert.ok(alt.includes(Object.values(t.needs)[0] + ' ' + Object.keys(t.needs)[0]));
+  assert.ok(cards.every((c) => cardAlt(c).length > c.name.length + 10));
+});

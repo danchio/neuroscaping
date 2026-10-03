@@ -8,6 +8,7 @@ import { markSvg } from './ui/glyphs.js';
 import { costBox } from './ui/card.js';
 import { attachCombo } from './ui/combo.js';
 import './ui/dialogs.js';
+import './ui/cardimg.js';
 import { loadTags, loadRepoTags } from './tagstore.js';
 import { load, subscribe, state, activate, addDeck, activeDeck } from './store.js';
 import { parse, go, href } from './router.js';
