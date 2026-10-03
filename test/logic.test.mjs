@@ -487,20 +487,21 @@ test('mainframe suggestions split removal, damage and disruption', () => {
 });
 
 // ---- filters in the URL ----
-import { blankFilters, encodeFilters, decodeFilters } from '../src/lib/filters.js';
+import { blankFilters, encodeFilters, decodeFilters, decodeRange, encodeRange, normalizeRange, rangeSummary, inRamRange, multiSummary, toggleIn, matchesFilters, facetCounts, ramCounts, activeChips, hasAnyFilter, activeGroupCount } from '../src/lib/filters.js';
 import { RARITIES } from '../src/lib/cards.js';
 import { split, parse, href } from '../src/router.js';
 
 test('filters: round trip through a query string', () => {
   const F = blankFilters();
-  F.q = 'draw 2'; F.types.add('Character'); F.factions.add('Hacker'); F.factions.add('Mystic'); F.ram.add(1); F.ram.add(8);
+  F.q = 'draw 2'; F.types.add('Character'); F.factions.add('Hacker'); F.factions.add('Mystic'); F.ram = { min: 1, max: 3 };
   F.subtypes.add('Script'); F.tags.add('Robot'); F.mytags.add('draw-engine'); F.rarity.add(RARITIES[0]); F.iconic = true; F.hasAbility = true; F.inDeck = true;
   const qs = encodeFilters(F, 'name');
   assert.match(qs, /fac=Hacker,Mystic/);
   assert.ok(!qs.includes('inDeck') && !/deck/.test(qs), 'your deck is not part of a shared link');
   const { F: back, sort } = decodeFilters(qs, RARITIES);
   assert.equal(sort, 'name');
-  for (const k of ['types', 'factions', 'subtypes', 'tags', 'mytags', 'rarity', 'ram']) assert.deepEqual([...back[k]].sort(), [...F[k]].sort(), k);
+  for (const k of ['types', 'factions', 'subtypes', 'tags', 'mytags', 'rarity']) assert.deepEqual([...back[k]].sort(), [...F[k]].sort(), k);
+  assert.deepEqual(back.ram, { min: 1, max: 3 }); assert.match(qs, /ram=1-3/);
   assert.equal(back.q, 'draw 2'); assert.ok(back.iconic && back.hasAbility && !back.inDeck);
   assert.equal(encodeFilters(blankFilters()), '');
   assert.equal(encodeFilters(blankFilters(), 'id'), '');
@@ -510,11 +511,98 @@ test('filters: unknown or hostile values are dropped', () => {
   const { F, sort } = decodeFilters('fac=Hacker,Nope&type=Mainframe,<script>&ram=1,99,x&sort=weird&my=ok-tag,Bad Tag!&tag=Robot,Zzz', RARITIES);
   assert.deepEqual([...F.factions], ['Hacker']);
   assert.deepEqual([...F.types], ['Mainframe']);
-  assert.deepEqual([...F.ram], [1]);
+  assert.deepEqual(F.ram, { min: 1, max: 1 }, 'out-of-range and junk numbers are ignored');
   assert.deepEqual([...F.mytags], ['ok-tag']);
   assert.deepEqual([...F.tags], ['Robot']);
   assert.equal(sort, 'id');
   assert.equal(decodeFilters('').F.q, '');
+});
+
+test('filters: RAM range parsing, old list form, normalising', () => {
+  assert.deepEqual(decodeRange('1-3'), { min: 1, max: 3 });
+  assert.deepEqual(decodeRange('2-'), { min: 2, max: null });
+  assert.deepEqual(decodeRange('-3'), { min: null, max: 3 });
+  assert.deepEqual(decodeRange('3-1'), { min: 1, max: 3 }, 'reversed pair is swapped');
+  assert.deepEqual(decodeRange('0-9'), { min: 0, max: null }, 'a max of 8 or more is no max');
+  assert.deepEqual(decodeRange('1,2,5'), { min: 1, max: 5 }, 'old list form: lowest to highest');
+  assert.deepEqual(decodeRange('4'), { min: 4, max: 4 });
+  for (const bad of ['', '-', 'abc', '1-x', '--', '99', null, undefined]) assert.deepEqual(decodeRange(bad), { min: null, max: null }, String(bad));
+  assert.equal(encodeRange({ min: 1, max: 3 }), '1-3');
+  assert.equal(encodeRange({ min: 2, max: null }), '2-');
+  assert.equal(encodeRange({ min: null, max: 3 }), '-3');
+  assert.equal(encodeRange({ min: null, max: null }), '');
+  assert.equal(encodeRange({ min: 3, max: 1 }), '1-3');
+  assert.deepEqual(normalizeRange({ min: '2', max: '' }), { min: 2, max: null });
+  assert.deepEqual(normalizeRange({ min: -4, max: 2 }), { min: 0, max: 2 });
+  for (const r of [{ min: 1, max: 3 }, { min: 2, max: null }, { min: null, max: 3 }, { min: 4, max: 4 }]) assert.deepEqual(decodeRange(encodeRange(r)), r);
+  assert.deepEqual([rangeSummary({}), rangeSummary({ min: 2, max: null }), rangeSummary({ min: null, max: 3 }), rangeSummary({ min: 1, max: 3 }), rangeSummary({ min: 3, max: 3 }), rangeSummary({ min: 8, max: null })], ['Any', '2+', '\u22643', '1\u20133', '3', '8+']);
+  const { F } = decodeFilters('ram=2-&fac=Hacker', RARITIES);
+  assert.deepEqual(F.ram, { min: 2, max: null });
+  assert.equal(encodeFilters(F), 'fac=Hacker&ram=2-');
+});
+
+test('filters: RAM range keeps mainframes out only when a range is set', () => {
+  const mf = cards.find((c) => c.type === 'Mainframe'); const costed = cards.filter((c) => c.ram != null);
+  assert.ok(inRamRange(mf, { min: null, max: null }));
+  assert.ok(!inRamRange(mf, { min: 0, max: null }));
+  assert.ok(!inRamRange(mf, { min: null, max: 7 }));
+  const F = blankFilters(); F.ram = { min: 1, max: 3 };
+  const hit = costed.filter((c) => matchesFilters(c, F));
+  assert.ok(hit.length && hit.every((c) => c.ram >= 1 && c.ram <= 3));
+  assert.equal(hit.length, costed.filter((c) => c.ram >= 1 && c.ram <= 3).length);
+  F.ram = { min: 5, max: null };
+  assert.ok(cards.filter((c) => matchesFilters(c, F)).every((c) => c.ram >= 5));
+  assert.equal(cards.filter((c) => matchesFilters(c, blankFilters())).length, cards.length);
+});
+
+test('filters: multi-select logic (OR inside a group, AND between groups)', () => {
+  const F = blankFilters();
+  F.factions.add('Hacker'); F.factions.add('Mystic');
+  const fm = cards.filter((c) => matchesFilters(c, F));
+  assert.ok(fm.every((c) => c.factions.includes('Hacker') || c.factions.includes('Mystic')));
+  assert.equal(fm.length, cards.filter((c) => c.factions.some((f) => f === 'Hacker' || f === 'Mystic')).length);
+  F.types.add('Character'); F.types.add('Gear');
+  const both = cards.filter((c) => matchesFilters(c, F));
+  assert.ok(both.length < fm.length && both.every((c) => c.type === 'Character' || c.type === 'Gear'));
+  // your tags come through ctx
+  const G = blankFilters(); G.mytags.add('t1');
+  assert.equal(cards.filter((c) => matchesFilters(c, G, { cardTags: (id) => (id === cards[3].id ? ['t1', 't2'] : []) })).length, 1);
+  assert.equal(cards.filter((c) => matchesFilters(c, G)).length, 0);
+  // text search and in-deck
+  const Q = blankFilters(); Q.q = cards[0].name.split(' ')[0];
+  assert.ok(cards.filter((c) => matchesFilters(c, Q)).some((c) => c.id === cards[0].id));
+  const D = blankFilters(); D.inDeck = true;
+  assert.equal(cards.filter((c) => matchesFilters(c, D, { inDeck: (c) => c.id === 7 })).length, 1);
+  assert.equal(multiSummary(new Set(), ['A', 'B']), 'Any');
+  assert.equal(multiSummary(new Set(['B']), ['A', 'B']), 'B');
+  assert.equal(multiSummary(new Set(['B', 'A', 'C']), ['A', 'B', 'C']), 'A +2');
+  const s = new Set(); toggleIn(s, 'x'); assert.ok(s.has('x')); toggleIn(s, 'x'); assert.ok(!s.has('x'));
+});
+
+test('filters: option counts follow the other filters, not their own group', () => {
+  const F = blankFilters();
+  const all = facetCounts(cards, F, {}, 'factions');
+  assert.equal(all.get('Hacker'), cards.filter((c) => c.factions.includes('Hacker')).length);
+  F.types.add('Gear');
+  const gear = facetCounts(cards, F, {}, 'factions');
+  assert.equal(gear.get('Hacker') || 0, cards.filter((c) => c.type === 'Gear' && c.factions.includes('Hacker')).length);
+  F.factions.add('Mystic'); // own group is ignored, so other factions still show how many they would add
+  const still = facetCounts(cards, F, {}, 'factions');
+  assert.equal(still.get('Hacker') || 0, gear.get('Hacker') || 0);
+  const types = facetCounts(cards, F, {}, 'types'); // types are counted under the faction filter
+  assert.equal(types.get('Character') || 0, cards.filter((c) => c.type === 'Character' && c.factions.includes('Mystic')).length);
+  const ram = ramCounts(cards, blankFilters(), {});
+  assert.equal([...ram.values()].reduce((a, b) => a + b, 0), cards.filter((c) => c.ram != null).length);
+  assert.ok(!ram.has(undefined) && [...ram.keys()].every((k) => k >= 0 && k <= 8));
+});
+
+test('filters: removable chips and counters', () => {
+  const F = blankFilters();
+  assert.deepEqual(activeChips(F), []); assert.ok(!hasAnyFilter(F)); assert.equal(activeGroupCount(F), 0);
+  F.factions.add('Hacker'); F.factions.add('Corpo'); F.ram = { min: null, max: 3 }; F.iconic = true;
+  const chips = activeChips(F, (k, v) => `${k}:${v}`);
+  assert.deepEqual(chips.map((c) => c.label), ['factions:Hacker', 'factions:Corpo', 'RAM \u22643', 'Iconic only']);
+  assert.ok(hasAnyFilter(F)); assert.equal(activeGroupCount(F), 3);
 });
 
 test('router: query strings and deck tabs', () => {
