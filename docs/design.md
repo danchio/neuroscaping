@@ -30,7 +30,7 @@ Factions (on dark): Hacker `#19E3B1`, Cybernetic `#35C8FF`, Corpo `#FFC83A`, Dus
 - **Display**: Saira Condensed 600/700. Squared, industrial, condensed. Card names, page titles, banner labels, big numerals. Sentence case except ability names, which are printed in capitals on the real cards.
 - **Body**: Hanken Grotesk 400/500/600. Rules text, controls, lists. Tabular figures for counts.
 - No monospace anywhere. No tracked-out capital eyebrows.
-- Scale: 12 / 13.5 (UI) / 15 (rules text) / 20 (card name) / 30 (page title) / 56 (home hero, mainframe name on its page).
+- Scale: see **Density** below. Body 13px, rules text 14px; display 13 to 34px; page titles 26px; hero and mainframe name `clamp(28px, 3.2vw, 38px)`.
 
 ## Signature element
 
@@ -136,3 +136,34 @@ Request: use the real card images instead of card text, easier on the eyes.
 - **Synergy map**: a small image follows the dot you point at; the side panel shows the selected card.
 - **Failure chain**: publisher bucket, then fan CDN, then the text card (same footprint, so nothing moves). Offline or blocked still gives a complete app.
 - **Performance**: `loading=lazy`, no eager 255 images, in-place updates of counts so steppers do not rebuild pictures, `keepImages` to carry loaded images across repaints.
+
+
+## Density pass
+
+Request: "everything is so damn big". The first version was sized like a landing page; this is a tool people sit in. All sizes now come from tokens in `:root` and nothing else in `style.css` should use raw px for padding, gaps, type or control height.
+
+| Token | Value | Use |
+|---|---|---|
+| `--sp-1 .. --sp-7` | 4 / 6 / 8 / 12 / 16 / 24 / 32 | padding, gaps, margins |
+| `--ctl` | 30px (44px touch) | inputs, selects, buttons, filter fields |
+| `--ctl-sm` | 26px (38px touch) | small buttons, steppers, chips, popover options |
+| `--ctl-lg` | 36px (48px touch) | primary actions, the add-a-card box |
+| `--cost` | 22px | RAM cost box |
+| `--t-xs .. --t-xl` | 11 / 12 / 13 / 14 / 15 | Hanken Grotesk: captions, secondary, UI, rules text, lede |
+| `--d-xs .. --d-2xl` | 13 / 15 / 17 / 20 / 26 / 34 | Saira Condensed: banners, row names, section banners, card names, page titles, big numerals |
+| `--d-hero` | clamp(28px, 3.2vw, 38px) | home headline, mainframe name |
+| `--bar` | 46px | top bar |
+
+Touch: `@media (pointer: coarse), (max-width: 720px)` raises `--ctl` to 44px, `--ctl-sm` to 38px and `--ctl-lg` to 48px, and sets inputs to 16px so iOS does not zoom. Desktop stays at 30 / 26.
+
+What shrank: top bar 54 to 46px; page titles 40 to 26; home hero about half the height; deck rows 36 to 30px; stats strip (RAM curve 112 to 72px); deck tabs 40 to 32px; drawer 540 to 440px wide; mainframe page header (image 240 to 160px, name 72 to 38px). Card image grids go from about 6 to about 7 columns at 1440 (minimum tile 148px), still large enough to read the art.
+
+**Home mainframe tiles** are now a short art strip (aspect 535:210 instead of 535:300) with the name and faction glyphs on one line and the tier thresholds underneath: 6 across at 1440, 3 across on a phone (dual-faction tiles say "1 / 2 each" and rely on the glyphs for names on phones).
+
+## Filters
+
+The Cards rail is one dropdown field per filter (label left, summary right, badge when active). On desktop the list opens as a flyout to the right of its field so the other fields stay reachable; elsewhere it opens below or flips above. The popover lives on `<body>` with `position: fixed`, so the scrolling rail never clips it. Multi-select options are checkboxes with live counts (what you would see given every other filter; a zero is dimmed). Faction options keep glyph and colour, and a checked box takes the option's colour.
+
+RAM cost is a range field with Min and Max selects (native selects: keyboard friendly and the right size on touch). Entering a min above the max pulls the max up to match, and options that would invert the range are disabled. Selected filters repeat above the grid as removable chips with Clear all. Below 1040px the rail becomes a bottom sheet behind a Filters button (with a count badge) and a "Show N cards" button.
+
+Accessibility: field is a button (`aria-haspopup`, `aria-expanded`, `aria-controls`); options are `role="option"` in a `listbox` with `aria-multiselectable`; arrows, Home, End, type-ahead, Space/Enter toggle, Esc closes and returns focus, Tab closes.
