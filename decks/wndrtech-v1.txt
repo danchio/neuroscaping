@@ -1,0 +1,18 @@
+Deck: WNDRTECH v1
+Mainframe: WNDRTECH
+4 Nova, the White Rabbit
+4 Alice, Dreamwalker
+4 Queen of Hearts
+4 White Knight
+4 Red Knight
+4 Mad Hatter
+4 Big Kat
+4 Wonderland
+3 Cheshire.RAR
+4 Drink Me
+4 Eat Me
+4 Through the Looking Glass
+3 Jabberwocky
+Sideboard:
+1 Cheshire.RAR
+1 Jabberwocky
