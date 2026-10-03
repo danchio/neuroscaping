@@ -100,8 +100,8 @@ export function mountCards(root) {
   function paintRail() {
     for (const id of [...F.mytags]) if (!effective().tags.some((t) => t.id === id)) F.mytags.delete(id);
     const active = F.q || F.types.size || F.factions.size || F.subtypes.size || F.tags.size || F.mytags.size || F.rarity.size || F.ram.size || F.iconic || F.hasAbility || F.inDeck;
-    $('#c-rail').innerHTML = group('Type', 'types', ['Character', 'Program', 'Gear', 'Mainframe']) + group('Faction', 'factions', FACTIONS, { fac: true })
-      + group('RAM cost', 'ram', [0, 1, 2, 3, 4, 5, 6, 7, 8], { label: (v) => (v === 8 ? '8+' : String(v)) }) + group('Subtype', 'subtypes', SUBTYPES) + group('Tag', 'tags', TAGS) + myTagGroup() + group('Rarity', 'rarity', RARITIES)
+    $('#c-rail').innerHTML = (effective().tags.length ? myTagGroup() : '') + group('Type', 'types', ['Character', 'Program', 'Gear', 'Mainframe']) + group('Faction', 'factions', FACTIONS, { fac: true })
+      + group('RAM cost', 'ram', [0, 1, 2, 3, 4, 5, 6, 7, 8], { label: (v) => (v === 8 ? '8+' : String(v)) }) + group('Subtype', 'subtypes', SUBTYPES) + group('Tag', 'tags', TAGS) + (effective().tags.length ? '' : myTagGroup()) + group('Rarity', 'rarity', RARITIES)
       + `<div class="toggles"><label><input type="checkbox" data-act="c-toggle" data-key="iconic" ${F.iconic ? 'checked' : ''}> Iconic only</label>
          <label><input type="checkbox" data-act="c-toggle" data-key="hasAbility" ${F.hasAbility ? 'checked' : ''}> Has a RAM-cost ability</label>
          <label><input type="checkbox" data-act="c-toggle" data-key="inDeck" ${F.inDeck ? 'checked' : ''}> Only cards in your deck</label></div>`

@@ -46,7 +46,7 @@ export function partnersOf(graph, id, min) {
   for (const e of graph.edges) {
     if (e.weight < min || (e.a !== id && e.b !== id)) continue;
     const other = byId.get(e.a === id ? e.b : e.a);
-    out.push({ card: other, n: graph.nodes.find((x) => x.id === other.id).n, weight: e.weight, why: worksWith(me, other) });
+    out.push({ card: other, n: graph.nodes.find((x) => x.id === other.id).n, weight: e.weight, why: worksWith(me, other).map((l) => (/^(asked for by name|names it)$/.test(l) ? l : `${l} link`)) });
   }
   return out.sort((a, b) => b.weight - a.weight || a.card.name.localeCompare(b.card.name));
 }
