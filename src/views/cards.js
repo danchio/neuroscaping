@@ -7,9 +7,12 @@ import { glyph, plusIcon, minusIcon } from '../ui/glyphs.js';
 import { cardFrame, fvar } from '../ui/card.js';
 import { activeDeck, change } from '../store.js';
 import { href } from '../router.js';
+import { tagToggle } from '../ui/tags.js';
+import { effective } from '../tagstore.js';
+import { hasAnyTag, usage } from '../lib/tags.js';
 import { titleCase } from '../lib/cards.js';
 
-const blank = () => ({ q: '', types: new Set(), factions: new Set(), subtypes: new Set(), tags: new Set(), rarity: new Set(), ram: new Set(), iconic: false, hasAbility: false, inDeck: false });
+const blank = () => ({ q: '', types: new Set(), factions: new Set(), subtypes: new Set(), tags: new Set(), mytags: new Set(), rarity: new Set(), ram: new Set(), iconic: false, hasAbility: false, inDeck: false });
 let F = blank();
 let sort = 'id';
 let railOpen = false;
@@ -31,6 +34,7 @@ function matches(c, deck) {
   if (F.factions.size && !c.factions.some((x) => F.factions.has(x))) return false;
   if (F.subtypes.size && !F.subtypes.has(c.subtype)) return false;
   if (F.tags.size && !c.tags.some((x) => F.tags.has(x))) return false;
+  if (F.mytags.size && !hasAnyTag(effective(), c.id, F.mytags)) return false;
   if (F.rarity.size && !F.rarity.has(c.rarity)) return false;
   if (F.ram.size && (c.ram == null || !F.ram.has(Math.min(c.ram, 8)))) return false;
   if (F.iconic && !c.iconic) return false;
@@ -45,6 +49,13 @@ const group = (title, key, values, { fac = false, label = (v) => v } = {}) =>
     const on = F[key].has(v);
     return `<button class="chip${fac ? ' fac' : ''}" aria-pressed="${on}" data-act="chip" data-key="${key}" data-val="${esc(v)}" ${fac ? `style="--c:${fvar(v)}"` : ''}>${fac ? glyph(v, 13) : ''}${esc(label(v))}</button>`;
   }).join('')}</div></fieldset>`;
+
+function myTagGroup() {
+  const eff = effective();
+  const use = usage(eff);
+  if (!eff.tags.length) return `<fieldset class="fgroup"><legend>Your tags</legend><p class="dim small">Tag cards from their details to filter by them here.</p><button class="linkbtn small" data-act="open-mydata">Make tags</button></fieldset>`;
+  return `<fieldset class="fgroup"><legend>Your tags <button class="linkbtn small lg-link" data-act="open-mydata">Manage</button></legend><div class="chips">${eff.tags.map((t) => tagToggle(t, { act: 'chip', on: F.mytags.has(t.id), extra: ` data-key="mytags" title="${use.get(t.id) || 0} cards"` })).join('')}</div></fieldset>`;
+}
 
 function tileFoot(c, deck) {
   if (c.type === 'Mainframe') return `<div class="tile-foot"><a class="btn small" href="${href.mainframe(c.id)}">Mainframe page</a><a class="btn small ghost" href="${href.card(c.id)}">Details</a></div>`;
@@ -75,9 +86,10 @@ export function mountCards(root) {
   $('#csort').addEventListener('change', (e) => { sort = e.target.value; paintGrid(); });
 
   function paintRail() {
-    const active = F.q || F.types.size || F.factions.size || F.subtypes.size || F.tags.size || F.rarity.size || F.ram.size || F.iconic || F.hasAbility || F.inDeck;
+    for (const id of [...F.mytags]) if (!effective().tags.some((t) => t.id === id)) F.mytags.delete(id);
+    const active = F.q || F.types.size || F.factions.size || F.subtypes.size || F.tags.size || F.mytags.size || F.rarity.size || F.ram.size || F.iconic || F.hasAbility || F.inDeck;
     $('#c-rail').innerHTML = group('Type', 'types', ['Character', 'Program', 'Gear', 'Mainframe']) + group('Faction', 'factions', FACTIONS, { fac: true })
-      + group('RAM cost', 'ram', [0, 1, 2, 3, 4, 5, 6, 7, 8], { label: (v) => (v === 8 ? '8+' : String(v)) }) + group('Subtype', 'subtypes', SUBTYPES) + group('Tag', 'tags', TAGS) + group('Rarity', 'rarity', RARITIES)
+      + group('RAM cost', 'ram', [0, 1, 2, 3, 4, 5, 6, 7, 8], { label: (v) => (v === 8 ? '8+' : String(v)) }) + group('Subtype', 'subtypes', SUBTYPES) + group('Tag', 'tags', TAGS) + myTagGroup() + group('Rarity', 'rarity', RARITIES)
       + `<div class="toggles"><label><input type="checkbox" data-act="c-toggle" data-key="iconic" ${F.iconic ? 'checked' : ''}> Iconic only</label>
          <label><input type="checkbox" data-act="c-toggle" data-key="hasAbility" ${F.hasAbility ? 'checked' : ''}> Has a RAM-cost ability</label>
          <label><input type="checkbox" data-act="c-toggle" data-key="inDeck" ${F.inDeck ? 'checked' : ''}> Only cards in your deck</label></div>`
@@ -96,7 +108,7 @@ export function mountCards(root) {
       : '<div class="empty-block"><h3>No cards match</h3><p>Remove a filter or change the search words.</p><button class="btn" data-act="c-reset">Clear all filters</button></div>';
   }
   paintRail(); paintGrid();
-  return { refresh: () => keepFocus(paintGrid), repaintAll: () => { paintRail(); paintGrid(); }, destroy() {} };
+  return { refresh: () => keepFocus(() => { paintRail(); paintGrid(); }), repaintAll: () => { paintRail(); paintGrid(); }, destroy() {} };
 }
 
 export function bindActions(getView) {

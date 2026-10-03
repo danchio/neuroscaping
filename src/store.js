@@ -9,6 +9,8 @@ export const state = { decks: [], activeId: null };
 const listeners = new Set();
 export const subscribe = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
 const emit = () => listeners.forEach((fn) => fn());
+/** Tell every view something changed (tags use this too). */
+export const notify = emit;
 
 export function load() {
   try {
@@ -19,6 +21,22 @@ export function load() {
 }
 function save() {
   try { localStorage.setItem(STORE, JSON.stringify({ decks: state.decks, activeId: state.activeId })); } catch { /* ignore */ }
+}
+
+// Small per-browser preferences (not decks, not tags).
+export const PREFS = 'neuroscape-deck-lab:prefs:v1';
+export function getPref(key, fallback) {
+  try { const o = JSON.parse(localStorage.getItem(PREFS) || '{}'); return key in o ? o[key] : fallback; } catch { return fallback; }
+}
+export function setPref(key, value) {
+  try { const o = JSON.parse(localStorage.getItem(PREFS) || '{}'); o[key] = value; localStorage.setItem(PREFS, JSON.stringify(o)); } catch { /* ignore */ }
+}
+
+/** Replace all decks (used by "My data" import after a safe merge). */
+export function replaceDecks(decks) {
+  state.decks = decks;
+  if (!state.decks.some((d) => d.id === state.activeId)) state.activeId = state.decks[0]?.id ?? null;
+  save(); emit();
 }
 
 export const getDeck = (id) => state.decks.find((d) => d.id === id) || null;

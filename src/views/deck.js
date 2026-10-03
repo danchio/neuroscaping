@@ -10,7 +10,10 @@ import { glyph, plusIcon, minusIcon, chevrons, markSvg } from '../ui/glyphs.js';
 import { cardFrame, costBox, glyphRow, statPlate, fvar, factionsStyle, sectionBanner, typeLine } from '../ui/card.js';
 import { meterHtml, mixBar, legalBadge, mfFactionOrder } from '../ui/parts.js';
 import { attachCombo } from '../ui/combo.js';
-import { getDeck, setDeck, activate, change, moveCard, pickMainframe, setMainframeExact, duplicateDeck } from '../store.js';
+import { effective } from '../tagstore.js';
+import { groupByTag, deckTagBoost } from '../lib/tags.js';
+import { tagChips } from '../ui/tags.js';
+import { getPref, setPref, getDeck, setDeck, activate, change, moveCard, pickMainframe, setMainframeExact, duplicateDeck } from '../store.js';
 import { href, go } from '../router.js';
 import { reg } from './registry.js';
 import { mountSynergy } from './synergy.js';
@@ -25,7 +28,8 @@ const RAM_KEYS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
 function groupsOf(entries) {
   const defs = [];
-  if (view.group === 'type') for (const t of ['Character', 'Program', 'Gear']) defs.push({ key: t, title: t === 'Gear' ? 'Gear' : `${t}s`, test: (c) => c.type === t });
+  if (view.group === 'tag') { /* built below from your tags */ }
+  else if (view.group === 'type') for (const t of ['Character', 'Program', 'Gear']) defs.push({ key: t, title: t === 'Gear' ? 'Gear' : `${t}s`, test: (c) => c.type === t });
   else if (view.group === 'ram') {
     for (const r of RAM_KEYS) defs.push({ key: `r${r}`, title: r === 8 ? '8+ RAM' : `${r} RAM`, test: (c) => c.ram != null && Math.min(c.ram, 8) === r });
     defs.push({ key: 'rn', title: 'No RAM cost', test: (c) => c.ram == null });
@@ -36,6 +40,7 @@ function groupsOf(entries) {
   const cmp = view.sort === 'name'
     ? (a, b) => a.c.name.localeCompare(b.c.name)
     : (a, b) => (a.c.ram ?? -1) - (b.c.ram ?? -1) || a.c.name.localeCompare(b.c.name);
+  if (view.group === 'tag') return groupByTag(entries, effective()).map((g) => ({ key: g.key, title: g.tag ? g.tag.name : 'Untagged', rows: g.rows.sort(cmp) }));
   return defs.map((g) => ({ ...g, rows: entries.filter((e) => g.test(e.c)).sort(cmp) })).filter((g) => g.rows.length);
 }
 
@@ -47,7 +52,7 @@ function rowHtml({ c, n }, zone, deck) {
   const atLimit = c.copyLimit > 0 && copiesOf(deck, c.id) >= c.copyLimit;
   return `<li class="row${over ? ' over' : ''}" data-id="${c.id}" style="--a:${c.factions[0] ? fvar(c.factions[0]) : 'var(--trace-hi)'}">
     <span class="stp" role="group" aria-label="Copies of ${esc(titleCase(c.name))}"><button data-act="r-dec" data-id="${c.id}" data-zone="${zone}" aria-label="Remove one ${esc(titleCase(c.name))}">${minusIcon}</button><b>${n}</b><button data-act="r-inc" data-id="${c.id}" data-zone="${zone}" aria-label="Add one ${esc(titleCase(c.name))}" ${atLimit ? 'aria-disabled="true"' : ''}>${plusIcon}</button></span>
-    <a class="rname" href="${href.card(c.id)}">${costBox(c)}<span class="rn">${esc(titleCase(c.name))}</span></a>
+    <span class="rcell"><a class="rname" href="${href.card(c.id)}">${costBox(c)}<span class="rn">${esc(titleCase(c.name))}</span></a>${tagChips(c.id)}</span>
     ${glyphRow(c, 14)}
     <span class="rsub">${esc(c.subtype || '')}</span>
     ${statPlate(c) || '<span></span>'}
@@ -75,8 +80,8 @@ export function mountDeck(root, id, tab = 'cards') {
     </div>
     <div class="dgrid">
       <div class="dmain">
-        <div class="lbar"><label for="g-group">Group by</label><select id="g-group"><option value="type">Type</option><option value="ram">RAM cost</option><option value="faction">Faction</option></select>
-        <label for="g-sort">Sort by</label><select id="g-sort"><option value="ram">RAM cost</option><option value="name">Name</option></select></div>
+        <div class="lbar"><label for="g-group">Group by</label><select id="g-group"><option value="type">Type</option><option value="ram">RAM cost</option><option value="faction">Faction</option><option value="tag">Your tags</option></select>
+        <label for="g-sort">Sort by</label><select id="g-sort"><option value="ram">RAM cost</option><option value="name">Name</option></select><span id="g-note" class="g-note"></span></div>
         <div id="d-list"></div>
         <div id="d-side"></div>
         <div id="d-notes"></div>
@@ -120,7 +125,7 @@ export function mountDeck(root, id, tab = 'cards') {
     if (e.target.id === 'd-name') setDeck({ ...D(), name: e.target.value }, { silent: true });
     if (e.target.id === 'd-notes-in') setDeck({ ...D(), notes: e.target.value }, { silent: true });
   });
-  root.addEventListener('change', (e) => { if (e.target.id === 'd-name') setDeck({ ...D(), name: e.target.value.trim() || 'Untitled deck' }); });
+  root.addEventListener('change', (e) => { if (e.target.id === 's-tags') { setPref('preferTags', e.target.checked); paintSugg(); } if (e.target.id === 'd-name') setDeck({ ...D(), name: e.target.value.trim() || 'Untitled deck' }); });
 
   // ---- preview follows hover and focus ----
   const showPreview = (cid) => {
@@ -196,6 +201,7 @@ export function mountDeck(root, id, tab = 'cards') {
   function paintList() {
     const d = D();
     const entries = entriesOf(d.main);
+    $('#g-note').textContent = view.group !== 'tag' ? '' : effective().tags.length ? 'A card with several tags shows under each.' : 'No tags yet. Open any card and add one under \u201cYour tags\u201d.';
     $('#d-list').innerHTML = entries.length
       ? groupsOf(entries).map((g) => `<section class="grp"><h3 class="grp-h"><span>${esc(g.title)}</span><b>${g.rows.reduce((s, r) => s + r.n, 0)}</b></h3><ul class="rows">${g.rows.map((r) => rowHtml(r, 'main', d)).join('')}</ul></section>`).join('')
       : `<div class="empty-block"><h3>This deck has no cards yet</h3><p>Type a card name in the box above, or add from the suggestions on the right.${d.mainframe ? '' : ' Choose a mainframe first and the suggestions will fit it.'}</p></div>`;
@@ -211,13 +217,16 @@ export function mountDeck(root, id, tab = 'cards') {
   function paintSugg() {
     const d = D();
     const mf = d.mainframe && byId.get(d.mainframe);
-    let all = suggestForDeck(d, 80);
+    const eff = effective();
+    const preferTags = eff.tags.length > 0 && getPref('preferTags', false);
+    let all = suggestForDeck(d, 80, preferTags ? { tagBoost: deckTagBoost(d, eff) } : {});
     const roles = [...new Set(all.map((s) => s.section))];
     if (view.role !== 'all' && !roles.includes(view.role)) view.role = 'all';
     const list = (view.role === 'all' ? all : all.filter((s) => s.section === view.role));
     const shown = list.slice(0, view.suggMax);
     $('#d-sugg').innerHTML = `<div class="sugg-head"><h2 class="sec-banner"><span>Suggested for this deck</span>${chevrons}</h2></div>
       <p class="note">From what your cards and mainframe say about each other. Not play statistics.</p>
+      ${eff.tags.length ? `<label class="sugg-tags"><input type="checkbox" id="s-tags"${preferTags ? ' checked' : ''}> Prefer cards that share a tag with this deck</label>` : ''}
       ${all.length ? `<div class="sugg-filter"><label class="sr" for="s-role">Filter suggestions by role</label><select id="s-role"><option value="all">All roles</option>${SECTIONS.filter((s) => roles.includes(s.id)).map((s) => `<option value="${s.id}"${view.role === s.id ? ' selected' : ''}>${esc(s.title)}</option>`).join('')}</select></div>` : ''}
       ${shown.length ? `<ul class="sg-list">${shown.map((s) => `<li class="sg" data-id="${s.card.id}">
         <a class="sg-name" href="${href.card(s.card.id)}">${costBox(s.card)}<span class="rn">${esc(titleCase(s.card.name))}</span>${glyphRow(s.card, 13)}</a>

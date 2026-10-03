@@ -4,6 +4,7 @@ import { persistentFactionCounts } from './deck.js';
 import { tierStatus } from './synergy.js';
 import { RULES_BRIEF } from './config.js';
 import { costPhrase } from './abilities.js';
+import { tagsOf } from './tags.js';
 
 const section = (zone) =>
   Object.entries(zone)
@@ -81,7 +82,8 @@ export function decodeShare(str) {
 }
 
 // ---- "Copy for AI" ----
-export function aiPrompt(deck) {
+/** `tagData` (optional) is the effective tag layer; your tags are added to each card line. */
+export function aiPrompt(deck, tagData = null) {
   const v = validate(deck);
   const counts = persistentFactionCounts(deck);
   const mf = deck.mainframe && byId.get(deck.mainframe);
@@ -91,7 +93,8 @@ export function aiPrompt(deck) {
     const cost = c.ram != null ? ` (${c.ram} RAM)` : '';
     const fac = [...c.factions, ...c.tags].join('/');
     const abil = c.abilities ? ` Abilities: ${c.abilities.map((a) => `${titleCase(a.name)} (cost: ${costPhrase(a)})`).join('; ')}.` : '';
-    return `- ${n}x ${titleCase(c.name)} [${c.type}${c.subtype ? ' ' + c.subtype : ''}${fac ? ', ' + fac : ''}]${cost}${stat}: ${c.text.join(' | ')}${abil}`;
+    const mine = tagData ? tagsOf(tagData, c.id).map((t) => t.name) : [];
+    return `- ${n}x ${titleCase(c.name)} [${c.type}${c.subtype ? ' ' + c.subtype : ''}${fac ? ', ' + fac : ''}]${cost}${stat}: ${c.text.join(' | ')}${abil}${mine.length ? ` My tags: ${mine.join(', ')}.` : ''}`;
   };
   const out = [
     'I am building a deck for the card game Neuroscape (Genesis set). Please help me improve it: find synergies, gaps, and weak cards, and suggest specific swaps from the Genesis set.',

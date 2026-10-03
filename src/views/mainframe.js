@@ -10,6 +10,9 @@ import { persistentCount } from './helpers.js';
 import { state, activeDeck, getDeck, newDeck, change, activate } from '../store.js';
 import { go, href } from '../router.js';
 import { reg } from './registry.js';
+import { effective } from '../tagstore.js';
+import { deckTagBoost } from '../lib/tags.js';
+import { getPref, setPref } from '../store.js';
 
 const PER = 8;
 const open = new Set(); // sections shown in full, kept across visits
@@ -26,7 +29,7 @@ export function mountMainframe(root, id) {
   const mf = byId.get(id);
   if (!mf || mf.type !== 'Mainframe') { root.innerHTML = '<div class="page"><div class="empty-block"><h3>Mainframe not found</h3><p>Pick one from the list.</p><a class="btn" href="#/mainframes">All mainframes</a></div></div>'; return { refresh() {}, destroy() {} }; }
   current = mf;
-  const sugg = suggestForMainframe(mf);
+  let sugg = suggestForMainframe(mf);
   const fs = mfFactionOrder(mf);
   const pool = persistentCount(fs);
   let booted = false;
@@ -40,6 +43,10 @@ export function mountMainframe(root, id) {
 
   const paint = () => {
     const deck = targetDeck(mf.id);
+    const eff = effective();
+    const canPrefer = !!deck && eff.tags.length > 0;
+    const prefer = canPrefer && getPref('preferTags', false);
+    sugg = suggestForMainframe(mf, prefer ? { tagBoost: deckTagBoost(deck, eff) } : {});
     const counts = deck ? persistentFactionCounts(deck) : {};
     const deckBar = deck
       ? `<p class="deckline">Adding to <a href="${href.deck(deck.id)}">${esc(deck.name)}</a> (${plural(total(deck.main), 'card')}). <a href="${href.deck(deck.id)}">Open deck</a></p>`
@@ -61,6 +68,7 @@ export function mountMainframe(root, id) {
       <div class="page">
         <p class="honest"><b>How suggestions work.</b> They come from card text: cards of this mainframe's factions, and cards that name each other. They are not play statistics, so treat them as a starting list and use your own judgement.</p>
         ${deckBar}
+        ${canPrefer ? `<label class="sugg-tags"><input type="checkbox" id="m-tags"${prefer ? ' checked' : ''}> Prefer cards that share a tag with ${esc(deck.name)}</label>` : ''}
         <nav class="jump" aria-label="Sections">${sugg.groups.map((g) => `<button class="chip" data-act="jump" data-id="s-${g.id}">${esc(g.title)} <span class="n">${g.items.length}</span></button>`).join('')}</nav>
         ${sugg.groups.map((g) => {
           const all = open.has(g.id);
@@ -75,6 +83,7 @@ export function mountMainframe(root, id) {
       </div>`;
     booted = true;
   };
+  root.addEventListener('change', (e) => { if (e.target.id === 'm-tags') { setPref('preferTags', e.target.checked); keepFocus(paint); } });
   paint();
   return { refresh: () => keepFocus(paint), destroy() { current = null; } };
 }

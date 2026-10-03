@@ -8,6 +8,7 @@ import { markSvg } from './ui/glyphs.js';
 import { costBox } from './ui/card.js';
 import { attachCombo } from './ui/combo.js';
 import './ui/dialogs.js';
+import { loadTags, loadRepoTags } from './tagstore.js';
 import { load, subscribe, state, activate, addDeck, activeDeck } from './store.js';
 import { parse, go, href } from './router.js';
 import { reg } from './views/registry.js';
@@ -21,6 +22,8 @@ bindActions(() => reg.view);
 bindDrawer();
 $('#brand-mark').innerHTML = markSvg;
 load();
+loadTags();
+loadRepoTags();
 
 // ---- top bar ----
 function renderBar(r) {

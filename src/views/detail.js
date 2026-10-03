@@ -2,11 +2,14 @@
 import { byId, titleCase } from '../lib/cards.js';
 import { lens, describeWants } from '../lib/synergy.js';
 import { copiesOf } from '../lib/deck.js';
-import { $, esc, onAct, toast, plural } from '../ui/dom.js';
+import { $, esc, onAct, toast, plural, keepFocus } from '../ui/dom.js';
 import { plusIcon, minusIcon, closeIcon } from '../ui/glyphs.js';
 import { cardFrame, costBox, glyphRow, sectionBanner } from '../ui/card.js';
 import { activeDeck, change, newDeck, pickMainframe, setMainframeExact } from '../store.js';
 import { href, go } from '../router.js';
+import { effective, createTag, toggleCardTag } from '../tagstore.js';
+import { tagIdsOf } from '../lib/tags.js';
+import { tagToggle } from '../ui/tags.js';
 
 let currentId = null;
 const showAll = { works: false, asked: false };
@@ -19,6 +22,16 @@ function lensList(title, key, items, empty) {
   const list = showAll[key] ? items : items.slice(0, 8);
   return `<section class="lens-sec"><h3 class="plain">${title} <span class="n">${items.length}</span></h3>
     ${items.length ? `<ul class="lens-list">${list.map(lensRow).join('')}</ul>${items.length > 8 ? `<button class="linkbtn" data-act="lens-more" data-key="${key}">${showAll[key] ? 'Show fewer' : `Show all ${items.length}`}</button>` : ''}` : `<p class="dim">${empty}</p>`}</section>`;
+}
+
+function tagSection(c) {
+  const eff = effective();
+  const mine = new Set(tagIdsOf(eff, c.id));
+  return `<section class="tag-sec" aria-label="Your tags">
+    <h3 class="plain">Your tags</h3>
+    ${eff.tags.length ? `<div class="tag-row" role="group" aria-label="Tags on this card">${eff.tags.map((t) => tagToggle(t, { act: 'tag-toggle', id: c.id, on: mine.has(t.id) })).join('')}</div>` : '<p class="dim small">Make your own tags, like \u201cramp\u201d or \u201cburst\u201d, then filter cards and group your deck by them.</p>'}
+    <form class="tag-new" data-card="${c.id}" autocomplete="off"><label class="sr" for="tag-in">New tag name</label><input id="tag-in" type="text" maxlength="28" placeholder="${eff.tags.length ? 'New tag' : 'Name your first tag'}"><button class="btn small" type="submit">Add and tag</button></form>
+  </section>`;
 }
 
 function body(c) {
@@ -41,6 +54,7 @@ function body(c) {
     <button class="dlg-x" data-act="close-drawer" aria-label="Close card details">${closeIcon}</button>
     ${cardFrame(c, { mode: 'full' })}
     ${controls}
+    ${c.type === 'Mainframe' ? '' : tagSection(c)}
     ${wants.length ? `<p class="wants"><b>Looks for:</b> ${wants.map(esc).join(', ')}.</p>` : ''}
     ${lensList('Works with', 'works', L.worksWith, 'This card does not mention other cards or factions.')}
     ${lensList('Asked for by', 'asked', L.enabledBy, 'No other card or mainframe names it, its factions or its tags.')}
@@ -64,10 +78,21 @@ export function refreshCard() { if (currentId && $('#drawer').open) { const el =
 export function closeCardQuiet() { const el = $('#drawer'); closing = true; if (el.open) el.close(); closing = false; currentId = null; }
 
 export function bindDrawer() {
+  $('#drawer').addEventListener('submit', (e) => {
+    const f = e.target.closest('form.tag-new');
+    if (!f) return;
+    e.preventDefault();
+    const name = f.querySelector('input').value.trim();
+    if (!name) return;
+    const t = createTag(name);
+    if (t) { const id = Number(f.dataset.card); if (!(effective().cards[id] || []).includes(t.id)) toggleCardTag(id, t.id); }
+    const again = $('#drawer #tag-in'); again && again.focus();
+  });
   const el = $('#drawer');
   el.addEventListener('close', () => { currentId = null; if (!closing) onClose(); });
   el.addEventListener('click', (e) => { if (e.target === el) el.close(); }); // backdrop
 }
+onAct('tag-toggle', (el) => keepFocus(() => toggleCardTag(Number(el.dataset.id), el.dataset.val)));
 onAct('close-drawer', () => $('#drawer').close());
 onAct('lens-more', (el) => { showAll[el.dataset.key] = !showAll[el.dataset.key]; refreshCard(); });
 const dchange = (zone, delta) => (el) => { const d = activeDeck(); if (!d) return; const r = change(d.id, zone, Number(el.dataset.id), delta); if (r.message) toast(r.message); refreshCard(); const again = $(`#drawer [data-act="${el.dataset.act}"]`); again && !again.disabled && again.focus(); };

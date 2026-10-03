@@ -69,7 +69,7 @@ export function worksWith(anchor, c) {
 const pushWhy = (why, text) => { if (!why.includes(text)) why.push(text); };
 
 /** Ranked suggestions for one mainframe, grouped into sections. */
-export function suggestForMainframe(mf) {
+export function suggestForMainframe(mf, { tagBoost } = {}) {
   const mfFactions = new Set(Object.keys(Object.assign({}, ...mf.mainframe.tiers.map((t) => t.needs))));
   const out = [];
   for (const c of cards) {
@@ -80,8 +80,11 @@ export function suggestForMainframe(mf) {
     let s = score(link);
     if (inFaction) s += 2;
     if (counts) s += 1.5;
+    const tb = tagBoost && tagBoost.get(c.id);
+    if (tb) s += tb.score;
     if (s <= 0) continue;
     const why = [];
+    if (tb) pushWhy(why, `Shares your tag ${tb.names.join(', ')} with cards in your deck`);
     if (counts) pushWhy(why, `Counts toward ${c.factions.filter((f) => mfFactions.has(f)).join(' and ')} synergy`);
     else if (inFaction) pushWhy(why, `${c.factions.filter((f) => mfFactions.has(f)).join(' and ')} card, leaves play so it adds no synergy`);
     const ww = worksWith(mf, c).filter((l) => !mfFactions.has(l));
@@ -94,7 +97,7 @@ export function suggestForMainframe(mf) {
 }
 
 /** Suggestions for a deck: card-text synergy with what is already in it, plus tier progress. */
-export function suggestForDeck(deck, limit = 24) {
+export function suggestForDeck(deck, limit = 24, { tagBoost } = {}) {
   const mf = deck.mainframe && byId.get(deck.mainframe);
   const inDeck = Object.keys(deck.main).map(Number).map((id) => byId.get(id)).filter(Boolean);
   if (!mf && !inDeck.length) return [];
@@ -124,6 +127,8 @@ export function suggestForDeck(deck, limit = 24) {
     if (mf && score(reasons(mf, c)) + score(reasons(c, mf)) > 0) names.push(titleCase(mf.name));
     names.push(...partners.sort((a, b) => (deck.main[b.id] || 0) - (deck.main[a.id] || 0)).map((a) => titleCase(a.name)));
     if (names.length) pushWhy(why, `Works with ${names.slice(0, 3).join('; ')}${names.length > 3 ? ` and ${names.length - 3} more` : ''}`);
+    const tb = tagBoost && tagBoost.get(c.id);
+    if (tb) { s += tb.score; pushWhy(why, `Shares your tag ${tb.names.join(', ')} with cards in this deck`); }
     if (s > 0) out.push({ card: c, score: s, why, section: sectionOf(c) });
   }
   return out.sort((a, b) => b.score - a.score || a.card.id - b.card.id).slice(0, limit);

@@ -248,3 +248,121 @@ test('graph layout: deterministic, nothing overlaps, clusters by primary faction
   for (const p of ps) assert.ok(p.x - p.r >= x && p.x + p.r <= x + w && p.y - p.r >= y && p.y + p.r <= y + h);
   assert.ok(nodeRadius(4) > nodeRadius(1));
 });
+
+// ---- custom tags and backups ----
+import { TAG_COLORS, emptyTags, normalizeTags, addTag, editTag, removeTag, setCardTag, mergeLayers, tagsOf, usage, deckTagBoost, groupByTag, hasAnyTag, deckTagCounts } from '../src/lib/tags.js';
+import { buildBackup, parseBackup, mergeBackup } from '../src/lib/backup.js';
+
+test('tags: add, dedupe by name, rename, recolour, remove', () => {
+  let d = emptyTags();
+  let r = addTag(d, '  Draw   engine ', TAG_COLORS[0].hex); d = r.data;
+  assert.deepEqual(d.tags, [{ id: 'draw-engine', name: 'Draw engine', color: TAG_COLORS[0].hex }]);
+  assert.equal(addTag(d, 'draw ENGINE').tag.id, 'draw-engine');
+  assert.equal(addTag(d, 'draw ENGINE').data, d, 'no duplicate created');
+  assert.equal(addTag(d, '   ').tag, null);
+  d = addTag(d, 'ramp').data;
+  d = editTag(d, 'ramp', { name: 'Ramp up', color: 'not-a-colour' });
+  assert.deepEqual(d.tags[1], { id: 'ramp', name: 'Ramp up' });
+  d = setCardTag(d, card('Admin').id, 'ramp', true);
+  d = setCardTag(d, card('Admin').id, 'ramp', true);
+  assert.deepEqual(d.cards[card('Admin').id], ['ramp']);
+  d = removeTag(d, 'ramp');
+  assert.deepEqual(d.cards, {});
+  assert.equal(addTag(addTag(emptyTags(), 'a b').data, 'a-b').tag.id, 'a-b-2', 'ids stay unique when names differ but slug the same');
+});
+
+test('tags: normalize drops junk, unknown cards and unknown tag ids', () => {
+  const n = normalizeTags({ tags: [{ id: 'x', name: 'X' }, { name: '' }, { id: 'x', name: 'Dupe' }, 7], cards: { [card('Admin').id]: ['x', 'ghost'], 99999: ['x'], [card('Coder').id]: 'x' } });
+  assert.deepEqual(n.tags, [{ id: 'x', name: 'X' }]);
+  assert.deepEqual(n.cards, { [card('Admin').id]: ['x'] });
+  assert.deepEqual(normalizeTags({ tags: [], cards: { [card('Admin').id]: ['from-repo', 'Bad Id!'] } }, { lenient: true }).cards, { [card('Admin').id]: ['from-repo'] }, 'lenient keeps ids defined elsewhere');
+  assert.deepEqual(normalizeTags({ cards: { [card('Admin').id]: [] } }, { lenient: true }).cards, { [card('Admin').id]: [] }, 'an empty local list survives (it hides repo tags)');
+  assert.deepEqual(normalizeTags(null), emptyTags());
+  assert.deepEqual(normalizeTags('nope'), emptyTags());
+});
+
+test('tags: local edits layer on top of the repo file', () => {
+  const A = card('Admin').id, C = card('Coder').id;
+  const repo = normalizeTags({ tags: [{ id: 'ramp', name: 'Ramp' }, { id: 'draw', name: 'Draw' }], cards: { [A]: ['ramp'], [C]: ['draw'] } });
+  const local = normalizeTags({ tags: [{ id: 'burst', name: 'Burst' }, { id: 'ramp', name: 'Ramp (mine)' }], cards: { [A]: ['burst'] } });
+  const eff = mergeLayers(repo, local);
+  assert.deepEqual(eff.tags.map((t) => [t.id, t.name, t.source]), [['ramp', 'Ramp (mine)', 'repo'], ['draw', 'Draw', 'repo'], ['burst', 'Burst', 'local']]);
+  assert.deepEqual(eff.cards[A], ['burst'], 'local list replaces repo list for an edited card');
+  assert.deepEqual(eff.cards[C], ['draw'], 'untouched card keeps the repo list');
+  assert.deepEqual(tagsOf(eff, A).map((t) => t.id), ['burst']);
+  const cleared = mergeLayers(repo, { tags: [], cards: { [A]: [] } });
+  assert.equal(cleared.cards[A], undefined, 'an empty local list clears the repo tags');
+  assert.equal(usage(eff).get('burst'), 1);
+});
+
+test('tags: deck boost, grouping and filtering', () => {
+  const A = card('Admin').id, C = card('Coder').id, S = card('Script Kiddie').id;
+  let eff = normalizeTags({ tags: [{ id: 'ramp', name: 'Ramp' }, { id: 'draw', name: 'Draw' }], cards: { [A]: ['ramp'], [S]: ['ramp', 'draw'], [C]: ['draw'] } });
+  const deck = { main: { [A]: 3 }, side: {} };
+  assert.equal(deckTagCounts(deck, eff).get('ramp'), 3);
+  const boost = deckTagBoost(deck, eff);
+  assert.ok(boost.has(S) && boost.has(A) && !boost.has(C), 'only cards sharing a tag with the deck');
+  assert.deepEqual(boost.get(S).names, ['Ramp']);
+  const entries = [A, C, card('Rubber Ducky').id].map((id) => ({ c: cards.find((x) => x.id === id), n: 1 }));
+  const g = groupByTag(entries, eff);
+  assert.deepEqual(g.map((x) => x.key), ['ramp', 'draw', 'untagged']);
+  assert.ok(hasAnyTag(eff, A, new Set(['ramp'])) && !hasAnyTag(eff, A, new Set(['draw'])) && hasAnyTag(eff, A, new Set()));
+});
+
+test('tags boost deck suggestions and say why', () => {
+  const eff = normalizeTags({ tags: [{ id: 'ramp', name: 'Ramp' }], cards: { [card('Admin').id]: ['ramp'], [card('Rubber Ducky').id]: ['ramp'] } });
+  let d = setMainframe(emptyDeck(), card('Firestarter').id);
+  d = changeCount(d, 'main', card('Admin').id, 2);
+  const plainS = suggestForDeck(d, 200);
+  const boosted = suggestForDeck(d, 200, { tagBoost: deckTagBoost(d, eff) });
+  const rd = card('Rubber Ducky').id;
+  const rank = (list) => list.findIndex((s) => s.card.id === rd);
+  assert.ok(rank(boosted) >= 0 && (rank(plainS) < 0 || rank(boosted) < rank(plainS)));
+  assert.ok(boosted.find((s) => s.card.id === rd).why.some((w) => /tag/i.test(w)));
+});
+
+test('backup: round trip, never overwrites, merges tags by name', () => {
+  const A = card('Admin').id;
+  let deck = setMainframe(emptyDeck('One'), card('Firestarter').id);
+  deck = changeCount(deck, 'main', A, 3);
+  const tags = normalizeTags({ tags: [{ id: 'ramp', name: 'Ramp' }], cards: { [A]: ['ramp'] } });
+  const file = JSON.stringify(buildBackup([deck], tags, new Date('2026-01-01T00:00:00Z')));
+  const inc = parseBackup(file);
+  assert.deepEqual(inc.decks[0], deck);
+  assert.deepEqual(inc.tags, tags);
+  // into an empty browser
+  let m = mergeBackup({ decks: [], tags: emptyTags() }, inc);
+  assert.deepEqual(m.summary, { decksAdded: 1, decksSame: 0, decksRenamed: 0, tagsAdded: 1, cardTagsAdded: 1 });
+  // same file again: nothing changes
+  m = mergeBackup({ decks: m.decks, tags: m.tags }, inc);
+  assert.deepEqual(m.summary, { decksAdded: 0, decksSame: 1, decksRenamed: 0, tagsAdded: 0, cardTagsAdded: 0 });
+  // same id but edited locally: the local deck is kept, the incoming one comes in under a new name
+  const edited = { ...m.decks[0], name: 'One (edited)' };
+  m = mergeBackup({ decks: [edited], tags: m.tags }, inc);
+  assert.equal(m.decks.length, 2);
+  assert.equal(m.decks[0].name, 'One (edited)');
+  assert.match(m.decks[1].name, /\(imported\)$/);
+  assert.notEqual(m.decks[1].id, deck.id);
+  // tag with a different id but the same name maps onto the existing tag
+  const other = normalizeTags({ tags: [{ id: 'my-ramp', name: 'ramp' }], cards: { [card('Coder').id]: ['my-ramp'] } });
+  const m2 = mergeBackup({ decks: [], tags }, { decks: [], tags: other });
+  assert.equal(m2.tags.tags.length, 1);
+  assert.deepEqual(m2.tags.cards[card('Coder').id], ['ramp']);
+  assert.deepEqual(m2.tags.cards[A], ['ramp'], 'existing card tags untouched');
+});
+
+test('backup: rejects files that are not ours', () => {
+  assert.throws(() => parseBackup('{oops'), /valid JSON/);
+  assert.throws(() => parseBackup('{"decks":[]}'), /Deck Lab backup/);
+  const ok = parseBackup(JSON.stringify({ app: 'neuroscape-deck-lab', decks: [{ id: 'z', name: 'Z', main: { 99999: 2, [card('Admin').id]: 2 }, side: {} }, { nope: 1 }] }));
+  assert.equal(ok.decks.length, 1);
+  assert.deepEqual(ok.decks[0].main, { [card('Admin').id]: 2 });
+});
+
+test('Copy for AI includes your tags when given', () => {
+  const A = card('Admin').id;
+  const eff = normalizeTags({ tags: [{ id: 'ramp', name: 'Ramp' }], cards: { [A]: ['ramp'] } });
+  const d = changeCount(emptyDeck('T'), 'main', A, 2);
+  assert.match(aiPrompt(d, eff), /My tags: Ramp\./);
+  assert.doesNotMatch(aiPrompt(d), /My tags/);
+});
