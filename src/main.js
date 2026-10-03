@@ -17,6 +17,7 @@ import { mountHome, mountMainframes } from './views/home.js';
 import { mountMainframe } from './views/mainframe.js';
 import { mountDeck } from './views/deck.js';
 import { mountCards, bindActions } from './views/cards.js';
+import { mountLife } from './views/life.js';
 import { openCard, refreshCard, closeCardQuiet, bindDrawer } from './views/detail.js';
 
 bindActions(() => reg.view);
@@ -28,7 +29,7 @@ loadRepoTags();
 
 // ---- top bar ----
 function renderBar(r) {
-  const section = { decks: 'decks', deck: 'decks', mainframes: 'mainframes', mainframe: 'mainframes', cards: 'cards', card: 'cards' }[(r || parse()).name === 'card' ? lastKind : (r || parse()).name];
+  const section = { decks: 'decks', deck: 'decks', mainframes: 'mainframes', mainframe: 'mainframes', cards: 'cards', card: 'cards', life: 'life' }[(r || parse()).name === 'card' ? lastKind : (r || parse()).name];
   $$('.nav a').forEach((a) => (a.dataset.nav === section ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
   const d = activeDeck();
   const chip = $('#bar-deck');
@@ -58,6 +59,7 @@ function mountRoute(r) {
     case 'mainframe': reg.view = mountMainframe(root, r.id); break;
     case 'mainframes': reg.view = mountMainframes(root); break;
     case 'cards': reg.view = mountCards(root); break;
+    case 'life': reg.view = mountLife(root); break;
     default: reg.view = mountHome(root);
   }
 }
@@ -89,7 +91,7 @@ function pageTitle(r) {
   const base = 'Neuroscaping';
   if (r.name === 'deck') { const d = state.decks.find((x) => x.id === r.id); return d ? `${d.name} | ${base}` : base; }
   if (r.name === 'mainframe') { const m = byId.get(r.id); return m ? `${titleCase(m.name)} | ${base}` : base; }
-  return { mainframes: `Mainframes | ${base}`, cards: `Cards | ${base}` }[r.name] || base;
+  return { mainframes: `Mainframes | ${base}`, cards: `Cards | ${base}`, life: `Life counter | ${base}` }[r.name] || base;
 }
 
 subscribe(() => { reg.view && reg.view.refresh(); refreshCard(); renderBar(); });

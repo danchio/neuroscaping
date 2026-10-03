@@ -664,3 +664,39 @@ test('alt text for a mainframe reads the lead-in and every tier', () => {
   for (const t of m.mainframe.tiers) assert.ok(alt.includes(Object.values(t.needs)[0] + ' ' + Object.keys(t.needs)[0]));
   assert.ok(cards.every((c) => cardAlt(c).length > c.name.length + 10));
 });
+
+import { newLife, adjust as lifeAdjust, rename as lifeRename, setPlayers as lifeSetPlayers, resetLife, normalizeLife, atZero, START as LIFE_START, CAP as LIFE_CAP } from '../src/lib/life.js';
+
+test('life counter: start, adjust, clamp', () => {
+  const s = newLife(2);
+  assert.deepEqual(s.players.map((p) => [p.mf, p.bf]), [[20, 20], [20, 20]]);
+  const a = lifeAdjust(s, 0, 'mf', -3);
+  assert.equal(a.players[0].mf, 17);
+  assert.equal(a.players[0].bf, 20);
+  assert.equal(s.players[0].mf, 20, 'does not mutate');
+  assert.equal(lifeAdjust(s, 1, 'bf', -99).players[1].bf, 0);
+  assert.equal(lifeAdjust(s, 1, 'bf', 5000).players[1].bf, LIFE_CAP);
+  assert.equal(lifeAdjust(s, 5, 'mf', 1), s);
+  assert.equal(lifeAdjust(s, 0, 'nope', 1), s);
+  assert.deepEqual(atZero(lifeAdjust(s, 0, 'bf', -20).players[0]), ['bf']);
+});
+test('life counter: players, names, reset', () => {
+  let s = lifeAdjust(newLife(2), 0, 'mf', -5);
+  s = lifeSetPlayers(s, 4);
+  assert.equal(s.players.length, 4);
+  assert.equal(s.players[0].mf, 15, 'keeps existing players');
+  assert.equal(s.players[3].name, 'Player 4');
+  assert.equal(lifeSetPlayers(s, 9).players.length, 4);
+  assert.equal(lifeSetPlayers(s, 1).players.length, 2);
+  assert.equal(lifeRename(s, 1, '  Dan  ').players[1].name, 'Dan');
+  assert.equal(lifeRename(s, 1, '   ').players[1].name, 'Player 2');
+  const r = resetLife(lifeRename(s, 0, 'Ann'));
+  assert.equal(r.players[0].mf, LIFE_START);
+  assert.equal(r.players[0].name, 'Ann');
+});
+test('life counter: broken saved data becomes a fresh game', () => {
+  for (const bad of [null, undefined, 'x', {}, { players: [] }, { players: 3 }]) assert.equal(normalizeLife(bad).players.length, 2);
+  const n = normalizeLife({ flip: false, players: [{ name: 'A', mf: 7, bf: 'x' }, { mf: -4 }, null] });
+  assert.equal(n.flip, false);
+  assert.deepEqual(n.players.map((p) => [p.name, p.mf, p.bf]), [['A', 7, 20], ['Player 2', 0, 20], ['Player 3', 20, 20]]);
+});

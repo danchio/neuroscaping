@@ -1,4 +1,4 @@
-// Hash routing: #/decks, #/deck/<id>[/synergy|/playtest], #/mainframes, #/mainframe/<id>, #/cards[?filters], #/card/<id>.
+// Hash routing: #/decks, #/deck/<id>[/synergy|/playtest], #/mainframes, #/mainframe/<id>, #/cards[?filters], #/card/<id>, #/life.
 export const DECK_TABS = ['cards', 'synergy', 'playtest'];
 
 /** Split "#/cards?fac=Hacker" into the path part and a URLSearchParams. */
@@ -16,6 +16,7 @@ export function parse(hash = location.hash) {
     case 'deck': return id ? { name: 'deck', id, tab: DECK_TABS.includes(tab) ? tab : 'cards' } : { name: 'decks' };
     case 'mainframes': return { name: 'mainframes' };
     case 'mainframe': return Number(id) ? { name: 'mainframe', id: Number(id) } : { name: 'mainframes' };
+    case 'life': return { name: 'life' };
     case 'cards': return { name: 'cards' };
     case 'card': return Number(id) ? { name: 'card', id: Number(id) } : { name: 'cards' };
     default: return { name: 'decks' };
@@ -26,6 +27,7 @@ export const href = {
   deck: (id, tab = 'cards') => (tab === 'cards' ? `#/deck/${id}` : `#/deck/${id}/${tab}`),
   mainframes: () => '#/mainframes',
   mainframe: (id) => `#/mainframe/${id}`,
+  life: () => '#/life',
   cards: (query = '') => `#/cards${query ? '?' + query : ''}`,
   card: (id) => `#/card/${id}`,
 };
