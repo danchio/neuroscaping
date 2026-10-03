@@ -56,8 +56,9 @@ export function legalBadge(deck) {
 const mfTiersChips = (mf) => {
   const tiers = mf.mainframe.tiers;
   const f = mfFactionOrder(mf);
-  if (f.length === 1) return `<span class="thr">${tiers.map((t) => Object.values(t.needs)[0]).join(' / ')} ${esc(f[0])}</span>`;
-  return `<span class="thr">${tiers.map((t) => Object.values(t.needs)[0]).join(' / ')} each ${f.map(esc).join(' + ')}</span>`;
+  const nums = tiers.map((t) => Object.values(t.needs)[0]).join(' / ');
+  if (f.length === 1) return `<span class="thr">${nums} ${esc(f[0])}</span>`;
+  return `<span class="thr">${nums} each<span class="thr-f"> ${f.map(esc).join(' + ')}</span></span>`;
 };
 
 /** A mainframe as an entry tile. */
@@ -65,8 +66,7 @@ export function mainframeTile(mf, { compact = false, decks = 0 } = {}) {
   const fs = mfFactionOrder(mf);
   return `<a class="mft${compact ? ' compact' : ''}" href="${href.mainframe(mf.id)}" style="${factionsStyle(fs)}"><span class="mft-edge"><span class="mft-in">
     <span class="mft-art">${cardImageHtml(mf, { size: 'art', alt: '' })}</span>
-    <span class="mft-glyphs">${fs.map((f) => `<span style="color:${fvar(f)}">${glyph(f, compact ? 22 : 28)}</span>`).join('')}</span>
-    <span class="mft-name">${esc(titleCase(mf.name))}</span>
+    <span class="mft-top"><span class="mft-name">${esc(titleCase(mf.name))}</span><span class="mft-glyphs">${fs.map((f) => `<span style="color:${fvar(f)}">${glyph(f, compact ? 15 : 18)}</span>`).join('')}</span></span>
     ${compact ? '' : `<span class="mft-lead">${mf.mainframe.lead ? rich(mf.mainframe.lead, false) + ' ' : ''}${rich(mf.mainframe.tiers[0].text, false)}</span>`}
     <span class="mft-foot">${mfTiersChips(mf)}${decks ? `<span class="mft-decks">${plural(decks, 'deck')}</span>` : ''}</span>
   </span></span></a>`;

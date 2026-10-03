@@ -70,8 +70,9 @@ export function mountMainframe(root, id) {
           <p class="crumbs"><a href="${href.mainframes()}">Mainframes</a></p>
           <h1><span class="mf-glyphs">${fs.map((f) => `<span style="color:${fvar(f)}">${glyph(f, 40)}</span>`).join('')}</span>${esc(titleCase(mf.name))}</h1>
           ${mf.mainframe.lead ? `<p class="mf-lead">${rich(mf.mainframe.lead, false)}</p>` : ''}
-          </div></div>
+          </div>
           <div class="row mf-actions"><button class="btn primary big" data-act="start-deck" data-id="${mf.id}">${deck ? 'Start another deck' : `Start a ${esc(titleCase(mf.name))} deck`}</button>${deck ? `<a class="btn big" href="${href.deck(deck.id)}">Open ${esc(deck.name)}</a>` : ''}</div>
+          </div>
         </div>
         <div class="mf-hero-meter">
           <h2 class="plain">${deck ? 'Tiers in your deck' : 'Synergy tiers'}</h2>
